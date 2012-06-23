@@ -1,7 +1,7 @@
 #include <limits.h>
 #include "sample1.h"
 #include "gtest/gtest.h"
-
+#include "proto_handler.h"
 
 // Tests Factorial().
 
