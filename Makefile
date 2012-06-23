@@ -54,4 +54,4 @@ sample1_unittest.o : test/sample1_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c test/sample1_unittest.cc
 
 sample1_unittest : sample1.o sample1_unittest.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o bin/$@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -pthread $^ -o bin/$@
