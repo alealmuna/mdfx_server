@@ -10,7 +10,7 @@ SERVER = mdfx_server
 GTEST_HEADERS = lib/include/gtest/*.h \
                 lib/include/gtest/internal/*.h
 
-CPPFLAGS += -Iinclude -Ilib/include -Ilib
+CPPFLAGS += -I. -Ilib/include -Ilib
 
 .PHONY: all test server clean distlean
 
