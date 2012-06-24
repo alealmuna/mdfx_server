@@ -26,9 +26,7 @@ clean :
 testclean :
 	rm -f  protoc_test_middleman test/test_message.pb.cc test/test_message.pb.h 
 
-distclean :
-	make clean
-	make testclean
+distclean : clean testclean
 	rm -f bin/$(TESTS) bin/$(SERVER)
 
 # Builds gtest.a and gtest_main.a.
