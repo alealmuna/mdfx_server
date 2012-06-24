@@ -1,0 +1,17 @@
+package mdfx_server;
+  
+message FXRequest{
+  optional uint64 begin_timestamp = 1;
+  optional uint64 end_timestamp = 2;
+  optional double max_rel_spread = 3
+  repeated string nemo_list = 4;
+}
+
+message BBOFXQuote{
+  optional uint64 timestamp = 1;
+  optional string symbol_nemo = 2;
+  optional double bid_price = 3;
+  optional int32 bid_size = 4;
+  optional double ask_price = 5;
+  optional int32 ask_size = 6;
+}

@@ -5,5 +5,5 @@ using namespace std;
 
 void ProtoHandler::readMessageFromFile()
 {
-    cout<<"bien ctm"<<endl;
+    cout<<"Reading protobuf message from file"<<endl;
 }
