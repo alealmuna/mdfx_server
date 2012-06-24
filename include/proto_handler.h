@@ -1,11 +1,10 @@
-#ifndef PROTO_HANDLER_H
-#define PROTO_HANDLER_H
-using namespace std;
+#ifndef INCLUDE_PROTO_HANDLER_H_
+#define INCLUDE_PROTO_HANDLER_H_
 
-class ProtoHandler
-{
-public:
-  // Read a protocol buffer message from a file
-  void readMessageFromFile();
+class ProtoHandler {
+  public:
+    // Read a protocol buffer message from a file
+    void readMessageFromFile();
 };
-#endif
+
+#endif  // INCLUDE_PROTO_HANDLER_H_

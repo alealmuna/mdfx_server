@@ -21,7 +21,7 @@ test: $(TESTS)
 all : $(SERVER) $(TESTS)
 
 clean :
-	rm -f $(TESTS) gtest.a gtest_main.a *.o 
+	rm -f $(TESTS) gtest.a gtest_main.a *.o $(INC_DIR)/*.gch
 
 testclean :
 	rm -f  protoc_test_middleman test/test_message.pb.cc test/test_message.pb.h 

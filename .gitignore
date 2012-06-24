@@ -13,3 +13,6 @@
 
 # Ctags
 tags
+
+# Binary files
+bin/*
