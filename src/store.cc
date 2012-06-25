@@ -1,5 +1,6 @@
 #include "hdf5.h"
 #define FILE "file.h5"
+#define file_id 5
 /* Filename */
 #define FILENAME "accum.h5"
 
