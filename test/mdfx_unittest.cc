@@ -1,21 +1,40 @@
 #include <limits.h>
+#include <fstream>
+#include <string>
+
 #include "include/sample1.h"
 #include "gtest/gtest.h"
 #include "include/proto_handler.h"
-#include "test/book.pb.h"
+#include "test/interfaces.pb.h"
 
-class BookTest :  public ::testing::Test{
+using namespace std;
+using std::remove;
+
+class FXRequestTest :  public ::testing::Test{
   protected:
-  testproto::AddressBook address_book;
-
+  ProtoHandler phandler;
+  mdfx_server::FXRequest request_in;
+  mdfx_server::FXRequest request_out;
 };
 
-//TEST_F(BookTest,ReadProtobuf){
-//  
-//  fstream input("book.pb", ios::in | ios::binary);
-//}
+TEST_F(FXRequestTest,ReadProtobuf){
+  fstream output("test/test_request", ios::out | ios::trunc | ios::binary);
+  
+  request_out.set_begin_timestamp(1309469186330);
+  request_out.set_end_timestamp(1309469193440);
+  request_out.set_max_rel_spread(0.01);
+  
+  request_out.add_nemo_list("EURUSD");
+  request_out.add_nemo_list("USDGBP");
+  request_out.SerializeToOstream(&output);
+  string filename("test/test_request");
+  EXPECT_TRUE( phandler.readRequestFromFile(filename));
+  remove(filename.c_str());
+  google::protobuf::ShutdownProtobufLibrary();
+}
 //
 //TEST_F(BoookTest,WriteProtobuf){
+//  fstream input("test_message", ios::in | ios::binary);
 //}
 // Tests Factorial().
 // Tests factorial of negative numbers.

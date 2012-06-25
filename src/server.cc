@@ -27,7 +27,7 @@ int main() {
 
   while (1) {
     cout << "Amucan Market Data FX" << endl;
-    phandler.readMessageFromFile();
+    phandler.readRequestFromFile("test_request");
 
     if (s_interrupted) {
       cout << "W: interrupt received, killing server..." << endl;
