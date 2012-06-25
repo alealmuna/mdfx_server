@@ -19,6 +19,6 @@ message Person {
   repeated PhoneNumber phone = 4;
 }
 
-message Test{
+message AddressBook{
     repeated Person person = 1;
 }
