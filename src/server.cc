@@ -76,9 +76,6 @@ int main() {
     }
   }
 
-  cout << "Cleaning..." << endl;
-  zmq_close(socket);
-  zmq_term(context);
   cout << "Exiting..." << endl;
 
   return 0;
