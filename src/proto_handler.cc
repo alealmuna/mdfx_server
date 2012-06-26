@@ -1,9 +1,12 @@
 #include <iostream>
 #include "include/proto_handler.h"
+#include "src/protobuf/interfaces.pb.h"
 
 using std::cout;
 using std::endl;
+using std::string;
 
-void ProtoHandler::readMessageFromFile() {
-  cout << "Reading protobuf message from file" << endl;
+bool ProtoHandler::readRequestFromFile(string request) {
+  cout << "Reading protobuf message from file: " << request  << endl;
+  return false;
 }
