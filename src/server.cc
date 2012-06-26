@@ -28,7 +28,7 @@ int main() {
   s_catch_signals();
 
   cout << "Amucan Market Data FX" << endl;
-  phandler.readMessageFromFile();
+  phandler.readRequestFromFile("test_request");
 
   //  Prepare our context and socket
   zmq::context_t context(1);
@@ -49,8 +49,8 @@ int main() {
 
     pb_request.ParseFromArray(request.data(), request.size());
 
-    std::cout << "server: Received " << pb_request.request_number() <<
-      ": " << pb_request.request_string() << std::endl;
+    std::cout << "server: Received " << pb_request.begin_timestamp() <<
+      ": " << pb_request.end_timestamp() << std::endl;
 
     // process the request
     // ...
@@ -59,8 +59,8 @@ int main() {
     // To test this, mdfx_server::FXRequest is used as response but it should
     // be mdfx_server::BBOFXQuote
     mdfx_server::FXRequest pb_response;
-    pb_response.set_response_string(pb_request.request_string());
-    pb_response.set_response_number(pb_request.request_number());
+    pb_response.set_begin_timestamp(pb_request.begin_timestamp());
+    pb_response.set_end_timestamp(pb_request.end_timestamp());
     std::string pb_serialized;
     pb_response.SerializeToString(&pb_serialized);
 
