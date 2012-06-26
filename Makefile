@@ -79,5 +79,6 @@ proto_handler.o: src/proto_handler.cc $(INC_DIR)/proto_handler.h protoc_interfac
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/proto_handler.cc `pkg-config --cflags --libs protobuf`
 
 mdfx_server: proto_handler.o src/server.cc 
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/server.cc proto_handler.o -o bin/$@ \
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/server.cc proto_handler.o -o bin/$@ \
+		-lzmq `pkg-config --cflags --libs protobuf`
 
