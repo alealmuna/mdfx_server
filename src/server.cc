@@ -1,7 +1,9 @@
 #include <signal.h>
+#include <zmq.hpp>
 #include <iostream>
 
 #include "include/proto_handler.h"
+#include "src/protobuf/interfaces.pb.h"
 
 using std::cout;
 using std::endl;
@@ -25,15 +27,59 @@ int main() {
 
   s_catch_signals();
 
-  while (1) {
-    cout << "Amucan Market Data FX" << endl;
-    phandler.readMessageFromFile();
+  cout << "Amucan Market Data FX" << endl;
+  phandler.readMessageFromFile();
 
-    if (s_interrupted) {
-      cout << "W: interrupt received, killing server..." << endl;
+  //  Prepare our context and socket
+  zmq::context_t context(1);
+  zmq::socket_t socket(context, ZMQ_REP);
+  socket.bind("tcp://*:5555");
+
+  while (!s_interrupted) {
+    zmq::message_t request;
+    mdfx_server::FXRequest pb_request;
+
+    // receive the request, and parse the protocol buffer from it
+    try {
+      socket.recv(&request);
+    } catch(zmq::error_t&) {
+      cout << "catched!" << endl;
+      break;
+    }
+
+    pb_request.ParseFromArray(request.data(), request.size());
+
+    std::cout << "server: Received " << pb_request.request_number() <<
+      ": " << pb_request.request_string() << std::endl;
+
+    // process the request
+    // ...
+
+    // create a response
+    // To test this, mdfx_server::FXRequest is used as response but it should
+    // be mdfx_server::BBOFXQuote
+    mdfx_server::FXRequest pb_response;
+    pb_response.set_response_string(pb_request.request_string());
+    pb_response.set_response_number(pb_request.request_number());
+    std::string pb_serialized;
+    pb_response.SerializeToString(&pb_serialized);
+
+    //  create the reply
+    zmq::message_t reply(pb_serialized.size());
+    memcpy((void *) reply.data(), pb_serialized.c_str(),
+        pb_serialized.size());
+    try {
+      socket.send(reply);
+    } catch(zmq::error_t&) {
+      cout << "catched!" << endl;
       break;
     }
   }
+
   cout << "Cleaning..." << endl;
+  zmq_close(socket);
+  zmq_term(context);
+  cout << "Exiting..." << endl;
+
   return 0;
 }
