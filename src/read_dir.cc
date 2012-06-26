@@ -1,4 +1,4 @@
-//#include "Readdir.h"
+#include "../include/read_dir.h"
 #include <iostream>     // cout, endl
 #include <fstream>      // fstream
 #include <vector>
@@ -33,7 +33,7 @@ vector<string> Readdir()
 
         for (vec::const_iterator it(v.begin()), it_end(v.end()); it != it_end; ++it)
         {
-	  regex e("(EURUSD).*");
+	  regex e("(csv).*");
 	  filename = (it->filename()).string();
 	  if(regex_match(filename, e))
 	  {
@@ -54,6 +54,6 @@ vector<string> Readdir()
     cout << ex.what() << '\n';
   }
 
-  return 0;
+  return arch;
 }	
 
