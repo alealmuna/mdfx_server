@@ -24,7 +24,7 @@ int main() {
 
     // create and send the zmq message
     zmq::message_t request(pb_serialized.size());
-    memcpy((void *) request.data(), pb_serialized.c_str(),
+    memcpy(reinterpret_cast<void *>(request.data()), pb_serialized.c_str(),
       pb_serialized.size());
 
     cout << "client: Sending request " << request_nbr << "..." <<

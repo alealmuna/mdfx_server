@@ -66,7 +66,7 @@ int main() {
 
     //  create the reply
     zmq::message_t reply(pb_serialized.size());
-    memcpy((void *) reply.data(), pb_serialized.c_str(),
+    memcpy(reinterpret_cast<void *>(reply.data()), pb_serialized.c_str(),
         pb_serialized.size());
     try {
       socket.send(reply);
