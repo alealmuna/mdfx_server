@@ -1,33 +1,30 @@
 #include "../include/read_csv.h"
 #include <vector>
 #include <string>
-#include <iostream>     // cout, endl
-#include <fstream>      // fstream
-#include <algorithm>    // copy
-#include <iterator>     // ostream_operator
+#include <iostream>     
+#include <fstream>      
+#include <algorithm>    
+#include <iterator>     
 #include <time.h>
 #include <sstream>
 
 #include <boost/tokenizer.hpp>
-//#include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace boost;
 
-int StrToInt(std::string const& s)
+float StrToInt(std::string const& s)
 {
     std::istringstream iss(s);
-    int value;
-    if (!(iss >> value)) throw std::runtime_error("invalid int");
+    float value;
+    if (!(iss >> value)) throw std::runtime_error("invalid float");
     return value;
 }
-
-//vector <string> vec;
 
 vector < vector<string> > Readcsv(vector<string> files) {
   vector <string> vec;
   vector < vector<string> > csv;
-  vector <int> vec_int;
+  vector <float> vec_int;
   vector<string>::const_iterator y = files.begin();
   while(y!=files.end())  //files cycle		
   {
@@ -40,20 +37,19 @@ vector < vector<string> > Readcsv(vector<string> files) {
     {
       Tokenizer tok(line);
       vec.assign(tok.begin(),tok.end());
-      for(int i=2;i<vec.size();i++)  //filter
-      {
-        transform(vec.begin(), vec.end(), back_inserter(vec_int), StrToInt);
-        vector<int>::const_iterator x = vec_int.begin();
-        while(x!=vec_int.end()) 	 	   	
-        {  
-          if(!(*x>0)) break;
+      transform(vec.begin(), vec.end(), back_inserter(vec_int), StrToInt);  //vector to float for filter operations
+      vector<float>::const_iterator x = vec_int.begin()+2;
+      bool valid = true;
+      while(x!=vec_int.end())   	 	   	
+      {  
+        if(!(*x>0)) valid=false;  //filter >0
           x++;
-        } 
       }
-      csv.push_back(vec); 
+      if(!(vec_int.at(4)>=vec_int.at(2))) valid=false;  //filter ask_price >= bid_price 
+      if(valid==true) csv.push_back(vec);
+      vec_int.clear(); 
     }
-    //cout << csv.at(0).at(0) << '\n';
-    y++;
+    y++;  
   }
   return csv;
 }
