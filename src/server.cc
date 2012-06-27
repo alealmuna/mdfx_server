@@ -43,7 +43,7 @@ int main() {
     try {
       socket.recv(&request);
     } catch(zmq::error_t&) {
-      cout << "catched!" << endl;
+      cout << zmq_strerror(errno) << endl;
       break;
     }
 
@@ -71,7 +71,7 @@ int main() {
     try {
       socket.send(reply);
     } catch(zmq::error_t&) {
-      cout << "catched!" << endl;
+      cout << zmq_strerror(errno) << endl;
       break;
     }
   }
