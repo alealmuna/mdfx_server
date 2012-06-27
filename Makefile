@@ -3,8 +3,9 @@ INC_DIR = include
 
 CXXFLAGS += -g -Wall -Wextra
 
-TESTS = sample1_unittest 
+TESTS = mdfx_unittest 
 SERVER = mdfx_server
+CLIENT = mdfx_client
 
 # Google Test headers.  
 GTEST_HEADERS = lib/include/gtest/*.h \
@@ -18,16 +19,19 @@ server: $(SERVER)
 
 test: $(TESTS)
 
-all : $(SERVER) $(TESTS)
+client: $(CLIENT)
+
+all : $(SERVER) $(TESTS) $(CLIENT)
 
 clean :
-	rm -f $(TESTS) gtest.a gtest_main.a *.o $(INC_DIR)/*.gch
+	rm -f $(TESTS) gtest.a gtest_main.a *.o $(INC_DIR)/*.gch 
+	rm -f protoc_interfaces_middleman src/protobuf/interfaces.pb.*
 
 testclean :
-	rm -f  protoc_test_middleman test/test_message.pb.cc test/test_message.pb.h 
+	rm -f  protoc_test_middleman test/interfaces.pb.cc test/interfaces.pb.h 
 
 distclean : clean testclean
-	rm -f bin/$(TESTS) bin/$(SERVER)
+	rm -f bin/$(TESTS) bin/$(SERVER) bin/$(CLIENT)
 
 # Builds gtest.a and gtest_main.a.
 
@@ -51,28 +55,36 @@ gtest_main.a : gtest-all.o gtest_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
-protoc_test_middleman: test/test_message.proto
-	protoc --cpp_out=test -Itest test/test_message.proto
+protoc_test_middleman: config/interfaces.proto
+	protoc --cpp_out=test -Iconfig config/interfaces.proto
 		@touch protoc_test_middleman
 
 sample1.o : $(SRC_DIR)/sample1.cc $(INC_DIR)/sample1.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(SRC_DIR)/sample1.cc
 
-sample1_unittest.o : test/sample1_unittest.cc \
+mdfx_unittest.o : test/mdfx_unittest.cc protoc_test_middleman proto_handler.o\
 	$(INC_DIR)/sample1.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c test/sample1_unittest.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c test/mdfx_unittest.cc `pkg-config --cflags --libs protobuf`
 
-sample1_unittest : sample1.o sample1_unittest.o gtest_main.a protoc_test_middleman
+mdfx_unittest : sample1.o mdfx_unittest.o gtest_main.a
 	pkg-config --cflags protobuf  # fails if protobuf is not installed
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) test/test_message.pb.cc \
- 	-pthread sample1.o sample1_unittest.o gtest_main.a \
-  -o bin/$@ `pkg-config --cflags --libs protobuf`
-
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) test/interfaces.pb.cc \
+ 	-pthread $^ proto_handler.o -o bin/$@ `pkg-config --cflags --libs protobuf`
 
 # Build Project
 
-proto_handler.o: src/proto_handler.cc $(INC_DIR)/proto_handler.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/proto_handler.cc
+protoc_interfaces_middleman: config/interfaces.proto
+	protoc --cpp_out=src/protobuf -Iconfig config/interfaces.proto
+	@touch protoc_interfaces_middleman
 
-mdfx_server: proto_handler.o src/server.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o bin/$@
+proto_handler.o: src/proto_handler.cc $(INC_DIR)/proto_handler.h protoc_interfaces_middleman
+	pkg-config --cflags protobuf  # fails if protobuf is not installed
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/proto_handler.cc `pkg-config --cflags --libs protobuf`
+
+mdfx_server: proto_handler.o src/server.cc 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/server.cc proto_handler.o -o bin/$@ \
+		-lzmq `pkg-config --cflags --libs protobuf`
+
+mdfx_client: protoc_interfaces_middleman src/client.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/client.cc -o bin/$@ \
+		-lzmq `pkg-config --cflags --libs protobuf`
