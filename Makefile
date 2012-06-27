@@ -5,6 +5,7 @@ CXXFLAGS += -g -Wall -Wextra
 
 TESTS = mdfx_unittest 
 SERVER = mdfx_server
+CLIENT = mdfx_client
 
 # Google Test headers.  
 GTEST_HEADERS = lib/include/gtest/*.h \
@@ -18,7 +19,9 @@ server: $(SERVER)
 
 test: $(TESTS)
 
-all : $(SERVER) $(TESTS)
+client: $(CLIENT)
+
+all : $(SERVER) $(TESTS) $(CLIENT)
 
 clean :
 	rm -f $(TESTS) gtest.a gtest_main.a *.o $(INC_DIR)/*.gch 
@@ -28,7 +31,7 @@ testclean :
 	rm -f  protoc_test_middleman test/interfaces.pb.cc test/interfaces.pb.h 
 
 distclean : clean testclean
-	rm -f bin/$(TESTS) bin/$(SERVER)
+	rm -f bin/$(TESTS) bin/$(SERVER) bin/$(CLIENT)
 
 # Builds gtest.a and gtest_main.a.
 
@@ -79,5 +82,9 @@ proto_handler.o: src/proto_handler.cc $(INC_DIR)/proto_handler.h protoc_interfac
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/proto_handler.cc `pkg-config --cflags --libs protobuf`
 
 mdfx_server: proto_handler.o src/server.cc 
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/server.cc proto_handler.o -o bin/$@ \
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/server.cc proto_handler.o -o bin/$@ \
+		-lzmq `pkg-config --cflags --libs protobuf`
 
+mdfx_client: protoc_interfaces_middleman src/client.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/client.cc -o bin/$@ \
+		-lzmq `pkg-config --cflags --libs protobuf`
