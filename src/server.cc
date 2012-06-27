@@ -59,12 +59,24 @@ int main() {
     // To test this, mdfx_server::FXRequest is used as response but it should
     // be mdfx_server::BBOFXQuote
     mdfx_server::FXRequest pb_response;
-    pb_response.set_begin_timestamp(pb_request.begin_timestamp());
-    pb_response.set_end_timestamp(pb_request.end_timestamp());
     std::string pb_serialized;
-    pb_response.SerializeToString(&pb_serialized);
 
-    //  create the reply
+    // create the reply as a multipart message
+    for (size_t i = 0; i < 10; ++i) {
+      pb_response.set_begin_timestamp(pb_request.begin_timestamp());
+      pb_response.set_end_timestamp(i);
+      pb_response.SerializeToString(&pb_serialized);
+      zmq::message_t reply(pb_serialized.size());
+      memcpy(reinterpret_cast<void *>(reply.data()), pb_serialized.c_str(),
+          pb_serialized.size());
+      try {
+        socket.send(reply, ZMQ_SNDMORE);
+      } catch(zmq::error_t&) {
+        cout << zmq_strerror(errno) << endl;
+        break;
+      }
+    }
+    // send the final part
     zmq::message_t reply(pb_serialized.size());
     memcpy(reinterpret_cast<void *>(reply.data()), pb_serialized.c_str(),
         pb_serialized.size());

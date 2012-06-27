@@ -15,8 +15,8 @@ int main() {
   for (int request_nbr = 0; request_nbr != 5; request_nbr++) {
     // set up the request protobuf
     mdfx_server::FXRequest pb_request;
-    pb_request.set_begin_timestamp(1111);
-    pb_request.set_end_timestamp(2222);
+    pb_request.set_begin_timestamp(1);
+    pb_request.set_end_timestamp(5);
 
     // serialize the request to a string
     std::string pb_serialized;
@@ -31,18 +31,26 @@ int main() {
       endl;
     socket.send(request);
 
-    //  create and receive the reply
-    zmq::message_t reply;
-    socket.recv(&reply);
+    while (1) {
+      //  create and receive the reply
+      zmq::message_t reply;
+      socket.recv(&reply);
 
-    // get the response object and parse it
-    mdfx_server::FXRequest pb_response;
-    pb_response.ParseFromArray(reply.data(), reply.size());
+      // get the response object and parse it
+      mdfx_server::FXRequest pb_response;
+      pb_response.ParseFromArray(reply.data(), reply.size());
 
-    assert(pb_response.begin_timestamp() == pb_request.begin_timestamp());
-    assert(pb_response.end_timestamp() == pb_request.end_timestamp());
-    cout << "client: Received " << pb_response.begin_timestamp() << ": "
-      << pb_response.end_timestamp() << endl;
+      //assert(pb_response.begin_timestamp() == pb_request.begin_timestamp());
+      //assert(pb_response.end_timestamp() == pb_request.end_timestamp());
+      cout << "client: Received " << pb_response.begin_timestamp() << ": "
+        << pb_response.end_timestamp() << endl;
+
+      int64_t more;
+      size_t more_size = sizeof (more);
+      zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &more_size);
+      if (!more)
+        break;      //  Last message part
+    }
   }
 
   cout << "Exiting..." << endl;
