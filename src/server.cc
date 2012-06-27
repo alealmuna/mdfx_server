@@ -89,6 +89,7 @@ int main() {
   }
 
   cout << "Exiting..." << endl;
+  google::protobuf::ShutdownProtobufLibrary();
 
   return 0;
 }
