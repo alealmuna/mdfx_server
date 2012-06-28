@@ -1,6 +1,8 @@
 #ifndef INCLUDE_PROTO_HANDLER_H_
 #define INCLUDE_PROTO_HANDLER_H_
 
+#include <iostream>
+
 using std::string;
 
 class ProtoHandler {
