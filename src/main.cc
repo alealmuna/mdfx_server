@@ -1,10 +1,10 @@
 #include <pthread.h>
 #include <signal.h>
 #include <zmq.hpp>
-#include <iostream>
 #include <google/protobuf/stubs/common.h>
+#include <iostream>
 
-#include "include/server.h"
+#include "include/worker.h"
 
 using std::cout;
 using std::endl;
@@ -37,7 +37,7 @@ int main() {
   // Launch pool of worker threads
   for (int thread_nbr = 0; thread_nbr != 2; thread_nbr++) {
     pthread_t worker;
-    pthread_create(&worker, NULL, Server::worker_routine,
+    pthread_create(&worker, NULL, Worker::worker_routine,
       (reinterpret_cast<void *>(&context)));
     pthread_detach(worker);
   }

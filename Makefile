@@ -84,11 +84,11 @@ proto_handler.o: src/proto_handler.cc $(INC_DIR)/proto_handler.h protoc_interfac
 	pkg-config --cflags protobuf  # fails if protobuf is not installed
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/proto_handler.cc `pkg-config --cflags --libs protobuf`
 
-server.o: $(SRC_DIR)/server.cc $(INC_DIR)/server.h protoc_interfaces_middleman
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/server.cc `pkg-config --cflags --libs protobuf` -lzmq
+worker.o: $(SRC_DIR)/worker.cc $(INC_DIR)/worker.h protoc_interfaces_middleman
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/worker.cc `pkg-config --cflags --libs protobuf` -lzmq
 
-mdfx_server: proto_handler.o server.o csv_handler.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/main.cc proto_handler.o server.o -o bin/$@ \
+mdfx_server: proto_handler.o worker.o csv_handler.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/main.cc proto_handler.o worker.o -o bin/$@ \
 		-lzmq `pkg-config --cflags --libs protobuf`
 
 mdfx_client: protoc_interfaces_middleman src/client.cc

@@ -1,14 +1,14 @@
 #include <zmq.hpp>
 #include <iostream>
 
-#include "include/server.h"
+#include "include/worker.h"
 #include "include/proto_handler.h"
 #include "src/protobuf/interfaces.pb.h"
 
 using std::cout;
 using std::endl;
 
-void *Server::worker_routine(void *arg) {
+void *Worker::worker_routine(void *arg) {
   // Prepare our context and socket
   zmq::context_t *context = (zmq::context_t *) arg;
   zmq::socket_t socket(*context, ZMQ_REP);
