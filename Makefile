@@ -11,7 +11,7 @@ CLIENT = mdfx_client
 GTEST_HEADERS = lib/include/gtest/*.h \
                 lib/include/gtest/internal/*.h
 
-CPPFLAGS += -I. -Ilib/include -Ilib
+CPPFLAGS += -I. -Ilib/include -Ilib -ltcmalloc
 
 .PHONY: all test server clean distlean
 
