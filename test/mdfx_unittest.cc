@@ -1,20 +1,27 @@
 #include <limits.h>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include "include/sample1.h"
 #include "gtest/gtest.h"
 #include "include/proto_handler.h"
+#include "include/csv_handler.h"
 #include "test/interfaces.pb.h"
 
-using namespace std;
-using std::remove;
+using std::fstream;
+using std::ios;
 
 class FXRequestTest :  public ::testing::Test{
   protected:
   ProtoHandler phandler;
   mdfx_server::FXRequest request_in;
   mdfx_server::FXRequest request_out;
+};
+
+class CsvHandlerTest : public ::testing::Test{
+  protected:
+  CsvHandler chandler;
 };
 
 TEST_F(FXRequestTest,ReadProtobuf){
@@ -31,6 +38,15 @@ TEST_F(FXRequestTest,ReadProtobuf){
   EXPECT_TRUE( phandler.readRequestFromFile(filename));
   remove(filename.c_str());
   google::protobuf::ShutdownProtobufLibrary();
+}
+
+TEST_F(CsvHandlerTest,ReadDirectory){
+  vector <string> files;
+  files.push_back("csvtest.csv");
+  files.push_back("csvtest2.csv");
+  for(int i=0;i<files.size();i++) {
+    EXPECT_EQ(files.at(i), chandler.readdir().at(i));
+  }
 }
 //
 //TEST_F(BoookTest,WriteProtobuf){
