@@ -87,9 +87,9 @@ proto_handler.o: src/proto_handler.cc $(INC_DIR)/proto_handler.h protoc_interfac
 worker.o: $(SRC_DIR)/worker.cc $(INC_DIR)/worker.h protoc_interfaces_middleman
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/worker.cc `pkg-config --cflags --libs protobuf` -lzmq
 
-mdfx_server: proto_handler.o worker.o csv_handler.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/main.cc proto_handler.o worker.o -o bin/$@ \
-		-lzmq `pkg-config --cflags --libs protobuf`
+mdfx_server: proto_handler.o csv_handler.o worker.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/main.cc proto_handler.o csv_handler.o worker.o -o bin/$@ \
+		-lzmq `pkg-config --cflags --libs protobuf` $(BOOST)
 
 mdfx_client: protoc_interfaces_middleman src/client.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/client.cc -o bin/$@ \
