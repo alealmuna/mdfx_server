@@ -27,12 +27,10 @@ int main() {
     memcpy(reinterpret_cast<void *>(request.data()), pb_serialized.c_str(),
       pb_serialized.size());
 
-    cout << "client: Sending request " << request_nbr << "..." <<
-      endl;
     socket.send(request);
 
     while (1) {
-      //  create and receive the reply
+      // create and receive the reply
       zmq::message_t reply;
       socket.recv(&reply);
 
@@ -40,13 +38,19 @@ int main() {
       mdfx_server::BBOFXQuote pb_response;
       pb_response.ParseFromArray(reply.data(), reply.size());
 
-      cout << "client: Received " << pb_response.timestamp() << endl;
+      // print each quote received
+      cout << pb_response.timestamp() << ",\t" <<
+        pb_response.symbol_nemo() << ",\t" <<
+        pb_response.bid_price() << ",\t" <<
+        pb_response.bid_size() << ",\t" <<
+        pb_response.ask_price() << ",\t" <<
+        pb_response.ask_size() << endl;
 
       int64_t more;
       size_t more_size = sizeof(more);
       zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &more_size);
       if (!more)
-        break;      //  Last message part
+        break;  //  Last message part
     }
   }
 

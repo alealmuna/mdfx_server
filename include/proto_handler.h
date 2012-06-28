@@ -1,14 +1,21 @@
 #ifndef INCLUDE_PROTO_HANDLER_H_
 #define INCLUDE_PROTO_HANDLER_H_
 
-#include <iostream>
+#include <zmq.hpp>
 
-using std::string;
+#include "src/protobuf/interfaces.pb.h"
+#include "constants.h"
+
+using std::vector;
 
 class ProtoHandler {
-  public:
-    // Read a protocol buffer message from a file
-    bool readRequestFromFile(string);
+ public:
+  // Reads a zmq message, parsing into to a protobuf and communicates with the
+  // HDF5 utilities to process the request
+  void ProcessRequest(
+      zmq::message_t &,
+      mdfx_server::FXRequest &,
+      vector <Quote> &);
 };
 
 #endif  // INCLUDE_PROTO_HANDLER_H_
