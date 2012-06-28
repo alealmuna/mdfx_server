@@ -1,6 +1,6 @@
 #include "../include/read_dir.h"
-#include <iostream>     // cout, endl
-#include <fstream>      // fstream
+#include <iostream>     
+#include <fstream>      
 #include <vector>
 #include <string>
 
@@ -21,7 +21,7 @@ vector<string> Readdir()
     if (exists(p))
     {
       if (is_regular_file(p))
-        cout << p << " size is " << file_size(p) << '\n';
+        cout << p << " size is " << file_size(p) << endl;
 
       else if (is_directory(p))
       {
@@ -33,25 +33,22 @@ vector<string> Readdir()
 
         for (vec::const_iterator it(v.begin()), it_end(v.end()); it != it_end; ++it)
         {
-	  regex e("(csv).*");
+	  regex e("(USDSGD).*");  //Simbols to find
 	  filename = (it->filename()).string();
 	  if(regex_match(filename, e))
-	  {
 	    arch.push_back(filename);
-	  }
         }
-	//cout << arch[0] << '\n';
-	return arch;
+	return arch; // csv directory ls
       }
       else
-        cout << p << " exists, but is neither a regular file nor a directory\n";
+        cout << p << " exists, but is neither a regular file nor a directory" << endl;
     }
     else
-      cout << p << " does not exist\n";
+      cout << p << " does not exist" << endl;
   }
   catch (const filesystem_error& ex)
   {
-    cout << ex.what() << '\n';
+    cout << ex.what() << endl;
   }
 
   return arch;
