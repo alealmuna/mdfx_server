@@ -1,12 +1,23 @@
-#include <iostream>
 #include "include/proto_handler.h"
-#include "src/protobuf/interfaces.pb.h"
 
-using std::cout;
-using std::endl;
-using std::string;
+void ProtoHandler::ProcessRequest(
+    zmq::message_t &request, 
+    mdfx_server::FXRequest &pb_request,
+    vector <Quote> &quotes) {
 
-bool ProtoHandler::readRequestFromFile(string request) {
-  cout << "Reading protobuf message from file: " << request  << endl;
-  return false;
+    pb_request.ParseFromArray(request.data(), request.size());
+
+    // Dummy quote for testing purposes
+    Quote quote;
+
+    quote.tstamp = 1;
+    quote.nemo = 1;
+    quote.bidp = 100;
+    quote.bids = 100;
+    quote.askp = 100;
+    quote.asks = 1000;
+
+    quotes.push_back(quote);
+    quote.tstamp = 2;
+    quotes.push_back(quote);
 }
