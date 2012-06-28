@@ -1,29 +1,23 @@
-#include <iostream>
-#include <fstream>
 #include "include/proto_handler.h"
-#include "src/protobuf/interfaces.pb.h"
 
-using std::cout;
-using std::cerr;
-using std::ios;
-using std::endl;
-using std::fstream;
+void ProtoHandler::ProcessRequest(
+    zmq::message_t &request, 
+    mdfx_server::FXRequest &pb_request,
+    vector <Quote> &quotes) {
 
-bool ProtoHandler::readRequestFromFile(string filename) {
-  fstream input(filename.c_str(), ios::in | ios::binary);
-  mdfx_server::FXRequest request;
-  request.ParseFromIstream(&input);
-  if (!input) {
-    cerr << "Failed to parse "  << filename << endl;
-//    return false;
-  }
-  
-  cout << "Reading protobuf message from file: " << filename << endl;
-  cout << "  begin_timestamp:" << request.begin_timestamp() << endl;
-  cout << "  end_timestamp:" << request.end_timestamp() << endl;
-  cout << "  max_rel_spread:" << request.max_rel_spread() << endl;
-//  for ( int i = 0; i < request.nemo_list.size(); i++){
-//    cout << request.nemo_list(i) << endl;
-//  }
-  return true;
+    pb_request.ParseFromArray(request.data(), request.size());
+
+    // Dummy quote for testing purposes
+    Quote quote;
+
+    quote.tstamp = 1;
+    quote.nemo = 1;
+    quote.bidp = 100;
+    quote.bids = 100;
+    quote.askp = 100;
+    quote.asks = 1000;
+
+    quotes.push_back(quote);
+    quote.tstamp = 2;
+    quotes.push_back(quote);
 }

@@ -14,11 +14,10 @@ GTEST_HEADERS = lib/include/gtest/*.h \
 CPPFLAGS += -I. -Ilib/include -Ilib -ltcmalloc
 BOOST = -lboost_system -lboost_filesystem -lboost_regex -lboost_date_time
 
-.PHONY: all test server clean distlean
-
 server: $(SERVER) 
 
 test: $(TESTS)
+	./bin/mdfx_unittest --gtest_output="xml:test/reports/"
 
 client: $(CLIENT)
 
@@ -85,10 +84,15 @@ proto_handler.o: src/proto_handler.cc $(INC_DIR)/proto_handler.h protoc_interfac
 	pkg-config --cflags protobuf  # fails if protobuf is not installed
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/proto_handler.cc `pkg-config --cflags --libs protobuf`
 
-mdfx_server: proto_handler.o src/server.cc 
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/server.cc proto_handler.o -o bin/$@ \
+worker.o: $(SRC_DIR)/worker.cc $(INC_DIR)/worker.h protoc_interfaces_middleman
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/worker.cc `pkg-config --cflags --libs protobuf` -lzmq
+
+mdfx_server: proto_handler.o worker.o csv_handler.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/main.cc proto_handler.o worker.o -o bin/$@ \
 		-lzmq `pkg-config --cflags --libs protobuf`
 
-mdfx_client: protoc_interfaces_middleman src/client.cc csv_handler.o
+mdfx_client: protoc_interfaces_middleman src/client.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/client.cc -o bin/$@ \
 		-lzmq `pkg-config --cflags --libs protobuf`
+
+.PHONY: all test server clean distlean

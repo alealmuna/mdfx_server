@@ -1,3 +1,6 @@
+#ifndef INCLUDE_CONSTANTS_H_
+#define INCLUDE_CONSTANTS_H_
+
 enum ENUM_NEMO {
   EUR_USD,
   GBP_USD,
@@ -12,3 +15,5 @@ typedef struct {
   float askp;
   float asks;
 } Quote;
+
+#endif  // INCLUDE_CONSTANTS_H_
