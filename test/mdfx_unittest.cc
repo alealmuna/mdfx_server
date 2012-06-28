@@ -42,12 +42,31 @@ TEST_F(FXRequestTest,ReadProtobuf){
 
 TEST_F(CsvHandlerTest,ReadDirectory){
   vector <string> files;
-  files.push_back("csvtest.csv");
-  files.push_back("csvtest2.csv");
+  //files.push_back("csvtest.csv");
+  files.push_back("EURUSDbbolala.csv");
   for(int i=0;i<files.size();i++) {
-    EXPECT_EQ(files.at(i), chandler.readdir().at(i));
+    EXPECT_EQ(files.at(i), chandler.readdir("test/dirtest").at(i));
   }
 }
+
+TEST_F(CsvHandlerTest,Readcsv){
+  vector <string> files;
+  vector <Quote> testvec;
+  files.push_back("EURUSDbbolala.csv");
+  testvec = chandler.readcsv(files);
+  EXPECT_EQ(12.144, testvec.at(0).bidp);
+  EXPECT_EQ(13.144, testvec.at(1).bidp);
+  //chandler.sortvec(testvec);
+  EXPECT_EQ(13.144, testvec.at(0).bidp);
+  EXPECT_EQ(12.144, testvec.at(1).bidp);
+}
+
+TEST_F(CsvHandlerTest,Fixdate){
+  string fdate = "2011/01/03";
+  string hrs = "17:05:17.562";
+  EXPECT_EQ(1294074317, chandler.fixdate(fdate, hrs));
+}
+
 //
 //TEST_F(BoookTest,WriteProtobuf){
 //  fstream input("test_message", ios::in | ios::binary);
