@@ -3,14 +3,28 @@
 
 #include "include/worker.h"
 #include "include/proto_handler.h"
-#include "src/protobuf/interfaces.pb.h"
+#include "include/csv_handler.h"
+#include "include/hdf5_handler.h"
 #include "include/constants.h"
+#include "src/protobuf/interfaces.pb.h"
 
 using std::cout;
 using std::endl;
 using std::vector;
 
-void *Worker::worker_routine(void *arg) {
+void Worker::preprocessor(void) {
+  CsvHandler csvhandler;
+  vector<string> files;
+  vector<Quote> quotes;
+
+  files = csvhandler.readdir("/home/pantro/data");
+  cout << "files: " << files[0] << endl;
+  quotes = csvhandler.readcsv(files);
+  cout << "number of quotes: " << quotes.size() << endl;
+  writeToH5(quotes);
+}
+
+void* Worker::listener(void *arg) {
   // Prepare our context and socket
   zmq::context_t *context = (zmq::context_t *) arg;
   zmq::socket_t socket(*context, ZMQ_REP);

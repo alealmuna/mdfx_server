@@ -1,3 +1,4 @@
+CXX=h5c++
 SRC_DIR = src
 INC_DIR = include
 
@@ -69,7 +70,7 @@ mdfx_unittest.o : test/mdfx_unittest.cc protoc_test_middleman proto_handler.o\
 mdfx_unittest : sample1.o mdfx_unittest.o csv_handler.o gtest_main.a
 	pkg-config --cflags protobuf  # fails if protobuf is not installed
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) test/interfaces.pb.cc \
- 	-pthread $^ proto_handler.o -o bin/$@ `pkg-config --cflags --libs protobuf` $(BOOST)
+ 	-pthread $^ proto_handler.o -o bin/$@ `pkg-config --cflags --libs protobuf` $(BOOST) -lzmq
 
 # Build Project
 
@@ -84,11 +85,14 @@ proto_handler.o: src/proto_handler.cc $(INC_DIR)/proto_handler.h protoc_interfac
 	pkg-config --cflags protobuf  # fails if protobuf is not installed
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/proto_handler.cc `pkg-config --cflags --libs protobuf`
 
+hdf5_handler.o: src/hdf5_handler.cc $(INC_DIR)/hdf5_handler.h 
+	$(CXX) -I. -c src/hdf5_handler.cc
+
 worker.o: $(SRC_DIR)/worker.cc $(INC_DIR)/worker.h protoc_interfaces_middleman
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c src/worker.cc `pkg-config --cflags --libs protobuf` -lzmq
 
-mdfx_server: proto_handler.o csv_handler.o worker.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/main.cc proto_handler.o csv_handler.o worker.o -o bin/$@ \
+mdfx_server: proto_handler.o csv_handler.o hdf5_handler.o worker.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/main.cc $^ -o bin/$@ \
 		-lzmq `pkg-config --cflags --libs protobuf` $(BOOST)
 
 mdfx_client: protoc_interfaces_middleman src/client.cc

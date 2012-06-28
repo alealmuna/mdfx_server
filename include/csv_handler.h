@@ -11,7 +11,7 @@ class CsvHandler {
   public:
     vector <Quote> readcsv(vector<string> files);
     int fixdate(string date, string hrs);
-    vector<string> readdir(char * dir);
+    vector<string> readdir(string dir);
     void sortvec (vector <Quote> vec); 
 };
 

@@ -40,7 +40,7 @@ float strtofloat(string const& s) {
   return value;
 }
 
-vector<string> CsvHandler::readdir(char * dir) {
+vector<string> CsvHandler::readdir(string dir) {
   string filename;
   vector<string> arch;
   path p (dir);
@@ -54,7 +54,7 @@ vector<string> CsvHandler::readdir(char * dir) {
         copy(directory_iterator(p), directory_iterator(), back_inserter(v));
         sort(v.begin(), v.end());
         for (vec::const_iterator it(v.begin()), it_end(v.end()); it != it_end; ++it) {
-	  regex exp("(EURUSD).*");  //Simbols to find
+	  regex exp("(USDJPY).*");  //Symbols to find
 	  filename = (it->filename()).string();
 	  if(regex_match(filename, exp))
 	    arch.push_back(filename);
@@ -84,7 +84,7 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
   vector <float> vec_float;
   vector<string>::const_iterator y = files.begin();
   while(y!=files.end()) {  //files cycle
-    string data("test/dirtest/"+*y);
+    string data("/tmp/mdfx_data/"+*y);
     split(nemov,*y,is_any_of("bbo"));  //nemo
     ifstream in(data.c_str());
     if (!in.is_open()) return quotes;
