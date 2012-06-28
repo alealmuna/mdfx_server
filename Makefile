@@ -19,6 +19,7 @@ BOOST = -lboost_system -lboost_filesystem -lboost_regex -lboost_date_time
 server: $(SERVER) 
 
 test: $(TESTS)
+	./bin/mdfx_unittest --gtest_output="xml:test/reports/"
 
 client: $(CLIENT)
 
