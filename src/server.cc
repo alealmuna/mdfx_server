@@ -55,15 +55,13 @@ void *worker_routine(void *arg) {
     // ...
 
     // create a response
-    // To test this, mdfx_server::FXRequest is used as response but it should
-    // be mdfx_server::BBOFXQuote
-    mdfx_server::FXRequest pb_response;
+    mdfx_server::BBOFXQuote pb_response;
     std::string pb_serialized;
 
     // create the reply as a multipart message
     for (size_t i = 0; i < 10; ++i) {
-      pb_response.set_begin_timestamp(pb_request.begin_timestamp());
-      pb_response.set_end_timestamp(i);
+      // dummy set
+      pb_response.set_timestamp(i);
       pb_response.SerializeToString(&pb_serialized);
       zmq::message_t reply(pb_serialized.size());
       memcpy(reinterpret_cast<void *>(reply.data()), pb_serialized.c_str(),
