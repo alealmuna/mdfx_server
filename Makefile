@@ -64,13 +64,13 @@ sample1.o : $(SRC_DIR)/sample1.cc $(INC_DIR)/sample1.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(SRC_DIR)/sample1.cc
 
 mdfx_unittest.o : test/mdfx_unittest.cc protoc_test_middleman proto_handler.o\
-	$(INC_DIR)/sample1.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c test/mdfx_unittest.cc `pkg-config --cflags --libs protobuf`
+	$(INC_DIR)/sample1.h  $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c test/mdfx_unittest.cc `pkg-config --cflags --libs protobuf`$(BOOST)
 
-mdfx_unittest : sample1.o mdfx_unittest.o gtest_main.a
+mdfx_unittest : sample1.o mdfx_unittest.o csv_handler.o gtest_main.a
 	pkg-config --cflags protobuf  # fails if protobuf is not installed
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) test/interfaces.pb.cc \
- 	-pthread $^ proto_handler.o -o bin/$@ `pkg-config --cflags --libs protobuf`
+ 	-pthread $^ proto_handler.o -o bin/$@ `pkg-config --cflags --libs protobuf` $(BOOST)
 
 # Build Project
 

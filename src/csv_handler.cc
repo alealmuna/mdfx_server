@@ -24,11 +24,11 @@ using boost::is_any_of;
 using std::transform;
 using std::back_inserter;
 using std::ifstream;
-using namespace boost::gregorian;
-using namespace boost::filesystem;
 using boost::tokenizer;
 using boost::regex;
 using boost::escaped_list_separator;
+using namespace boost::gregorian;
+using namespace boost::filesystem;
 
 float strtofloat(string const& s) {
   istringstream iss(s);
@@ -37,10 +37,10 @@ float strtofloat(string const& s) {
   return value;
 }
 
-vector<string> CsvHandler::Readdir() {
+vector<string> CsvHandler::readdir() {
   string simb[] = {"EURUSD", "USDGBP", "JPYUSD"}, filename;
   vector<string> arch;
-  path p ("../../staging/storrealba/cart_storrealba_20120615_095234010/");
+  path p ("../test/dirtest");
   try {
     if (exists(p)) {
       if (is_regular_file(p))
@@ -51,7 +51,7 @@ vector<string> CsvHandler::Readdir() {
         copy(directory_iterator(p), directory_iterator(), back_inserter(v));
         sort(v.begin(), v.end());
         for (vec::const_iterator it(v.begin()), it_end(v.end()); it != it_end; ++it) {
-	  regex exp("(USDSGD).*");  //Simbols to find
+	  regex exp("(csv).*");  //Simbols to find
 	  filename = (it->filename()).string();
 	  if(regex_match(filename, exp))
 	    arch.push_back(filename);
@@ -70,7 +70,7 @@ vector<string> CsvHandler::Readdir() {
   return arch;
 }
 	
-vector < vector<string> > CsvHandler:: Readcsv(vector<string> files) {
+vector < vector<string> > CsvHandler:: readcsv(vector<string> files) {
   vector <string> vec;
   vector < vector<string> > csv;
   vector <float> vec_float;
@@ -100,7 +100,7 @@ vector < vector<string> > CsvHandler:: Readcsv(vector<string> files) {
   return csv;
 }
 
-vector < vector<string> > CsvHandler::Sortvec(vector < vector<string> > vec) {
+vector < vector<string> > CsvHandler::sortvec(vector < vector<string> > vec) {
   vector < vector<string> > sorted;
   vector <string> datesplit;
   vector <string> timestamp;
