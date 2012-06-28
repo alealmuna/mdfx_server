@@ -22,3 +22,6 @@ bin/*
 
 # Protobuf generated files
 src/protobuf/*
+
+# Google test XML reports
+test/reports/*
