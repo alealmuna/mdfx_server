@@ -11,10 +11,8 @@ CLIENT = mdfx_client
 GTEST_HEADERS = lib/include/gtest/*.h \
                 lib/include/gtest/internal/*.h
 
-
-CPPFLAGS += -I. -Ilib/include -Ilib
+CPPFLAGS += -I. -Ilib/include -Ilib -ltcmalloc
 BOOST = -lboost_system -lboost_filesystem -lboost_regex -lboost_date_time
-
 
 .PHONY: all test server clean distlean
 

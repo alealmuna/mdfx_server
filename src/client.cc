@@ -37,16 +37,13 @@ int main() {
       socket.recv(&reply);
 
       // get the response object and parse it
-      mdfx_server::FXRequest pb_response;
+      mdfx_server::BBOFXQuote pb_response;
       pb_response.ParseFromArray(reply.data(), reply.size());
 
-      //assert(pb_response.begin_timestamp() == pb_request.begin_timestamp());
-      //assert(pb_response.end_timestamp() == pb_request.end_timestamp());
-      cout << "client: Received " << pb_response.begin_timestamp() << ": "
-        << pb_response.end_timestamp() << endl;
+      cout << "client: Received " << pb_response.timestamp() << endl;
 
       int64_t more;
-      size_t more_size = sizeof (more);
+      size_t more_size = sizeof(more);
       zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &more_size);
       if (!more)
         break;      //  Last message part
