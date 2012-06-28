@@ -11,7 +11,10 @@ CLIENT = mdfx_client
 GTEST_HEADERS = lib/include/gtest/*.h \
                 lib/include/gtest/internal/*.h
 
+
 CPPFLAGS += -I. -Ilib/include -Ilib
+BOOST = -lboost_system -lboost_filesystem -lboost_regex -lboost_date_time
+
 
 .PHONY: all test server clean distlean
 
@@ -73,6 +76,9 @@ mdfx_unittest : sample1.o mdfx_unittest.o gtest_main.a
 
 # Build Project
 
+csv_handler.o : $(SRC_DIR)/csv_handler.cc 
+	$(CXX) -I. -c $^ -o $@ $(BOOST)
+
 protoc_interfaces_middleman: config/interfaces.proto
 	protoc --cpp_out=src/protobuf -Iconfig config/interfaces.proto
 	@touch protoc_interfaces_middleman
@@ -85,6 +91,6 @@ mdfx_server: proto_handler.o src/server.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/server.cc proto_handler.o -o bin/$@ \
 		-lzmq `pkg-config --cflags --libs protobuf`
 
-mdfx_client: protoc_interfaces_middleman src/client.cc
+mdfx_client: protoc_interfaces_middleman src/client.cc csv_handler.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/client.cc -o bin/$@ \
 		-lzmq `pkg-config --cflags --libs protobuf`
