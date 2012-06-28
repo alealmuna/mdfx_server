@@ -1,12 +1,10 @@
 #include <pthread.h>
-#include <unistd.h>
 #include <signal.h>
 #include <zmq.hpp>
 #include <iostream>
+#include <google/protobuf/stubs/common.h>
 
 #include "include/server.h"
-#include "include/proto_handler.h"
-#include "src/protobuf/interfaces.pb.h"
 
 using std::cout;
 using std::endl;
