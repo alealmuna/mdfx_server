@@ -25,7 +25,7 @@ static void s_catch_signals(void) {
 }
 
 void *worker_routine(void *arg) {
-  //  Prepare our context and socket
+  // Prepare our context and socket
   zmq::context_t *context = (zmq::context_t *) arg;
   zmq::socket_t socket(*context, ZMQ_REP);
   socket.connect("inproc://workers");
@@ -105,6 +105,7 @@ int main() {
     pthread_t worker;
     pthread_create(&worker, NULL, worker_routine,
       (reinterpret_cast<void *>(&context)));
+    pthread_detach(worker);
   }
   // Connect work threads to client threads via a queue
   try {
