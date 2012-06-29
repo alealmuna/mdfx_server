@@ -57,9 +57,9 @@ vector<string> CsvHandler::readdir(string dir) {
         copy(directory_iterator(p), directory_iterator(), back_inserter(v));
         sort(v.begin(), v.end());
         for (vec::const_iterator it(v.begin()), it_end(v.end()); it != it_end; ++it) {
-	  regex exp("(USDJPY|EURUSD).*");  //Symbols to find
-	  filename = (it->filename()).string();
-	  if(regex_match(filename, exp))
+	  regex exp("(USDJPY|EURUSD)");  //Symbols to find
+	  filename = (*it).string();
+	  if(regex_search(filename, exp))
 	    arch.push_back(filename);
         }
 	return arch; // csv directory ls
@@ -94,16 +94,18 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
   nemo_map["USDJPY"] = 3;
 
   while(y!=files.end()) {  //files cycle
-    string data("test/dirtest/"+*y);
-    split(nemov,*y,is_any_of("bbo")); 
+    string data(*y);
+    split(nemov,*y,is_any_of("bbo"));
+    split(nemov,nemov.at(0),is_any_of("/")); 
     ifstream in(data.c_str());
-    if (!in.is_open()) return quotes;
+    if (!in.is_open()) cout << "file error" << endl;
     typedef tokenizer< escaped_list_separator<char> > Tokenizer;
     string line;
     while (getline(in,line)) {
       Tokenizer tok(line);
       vec.assign(tok.begin(),tok.end());
       vec.at(0) = fixdate(vec.at(0), vec.at(1));
+      quote.tstamp = totstamp(vec.at(0), vec.at(1));
       istringstream bidpf(vec.at(2));
       istringstream bidsf(vec.at(3));
       istringstream askpf(vec.at(4));
@@ -112,11 +114,10 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
       bidsf >> quote.bids;
       askpf >> quote.askp;
       asksf >> quote.asks;
-      quote.nemo = nemo_map[nemov.at(0)];
-      if(quote.bidp>0.0 && quote.bids>0 && quote.askp>0.0 && quote.asks>0 && quote.askp>=quote.bidp) {
+      quote.nemo = nemo_map[nemov.back()];
+      if(quote.bidp>0.0 && quote.bids>0 && quote.askp>0.0 && quote.asks>0 && quote.askp>=quote.bidp)
         quotes.push_back(quote);
-      }       
-    }
+    }    
     y++;  
   }
   return quotes;
