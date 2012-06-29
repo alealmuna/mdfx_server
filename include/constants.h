@@ -16,4 +16,13 @@ typedef struct {
   float asks;
 } Quote;
 
+
+typedef struct {
+  double begin_ts;
+  double end_ts;
+  double max_rel_spread;
+  char *nemo;
+} Fxrequest;
+
+
 #endif  // INCLUDE_CONSTANTS_H_
