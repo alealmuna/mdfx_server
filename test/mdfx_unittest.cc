@@ -11,6 +11,9 @@
 
 using std::fstream;
 using std::ios;
+using std::vector;
+using std::string;
+
 /*
 class FXRequestTest :  public ::testing::Test{
   protected:

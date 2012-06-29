@@ -4,16 +4,13 @@
 #include <vector>
 #include "include/constants.h"
 
-using std::string;
-using std::vector;
-
 class CsvHandler {
   public:
-    vector <Quote> readcsv(vector<string> files);
-    string fixdate(string date, string hrs);
-    double totstamp(string date, string hrs);
-    vector<string> readdir(char * dir);
-    void sortvec (vector <Quote> &); 
+    std::vector <Quote> readcsv(std::vector<std::string> files);
+    std::string fixdate(std::string date, std::string hrs);
+    double totstamp(std::string date, std::string hrs);
+    std::vector<std::string> readdir(std::string);
+    void sortvec (std::vector <Quote> &); 
 };
 
 #endif  // INCLUDE_CSV_HANDLER_H_
