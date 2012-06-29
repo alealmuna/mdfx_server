@@ -57,7 +57,7 @@ vector<string> CsvHandler::readdir(string dir) {
         copy(directory_iterator(p), directory_iterator(), back_inserter(v));
         sort(v.begin(), v.end());
         for (vec::const_iterator it(v.begin()), it_end(v.end()); it != it_end; ++it) {
-	  regex exp("(USDJPY).*");  //Symbols to find
+	  regex exp("(USDJPY|EURUSD).*");  //Symbols to find
 	  filename = (it->filename()).string();
 	  if(regex_match(filename, exp))
 	    arch.push_back(filename);
@@ -94,7 +94,7 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
   nemo_map["USDJPY"] = 3;
 
   while(y!=files.end()) {  //files cycle
-    string data("/tmp/mdfx_data/"+*y);
+    string data("test/dirtest/"+*y);
     split(nemov,*y,is_any_of("bbo")); 
     ifstream in(data.c_str());
     if (!in.is_open()) return quotes;
@@ -138,25 +138,22 @@ string CsvHandler::fixdate(string fdate, string hrs) {
 
 double CsvHandler::totstamp(string fdate, string hrs) {
   int tstamp, dayint;
-  float splitfloat;
-  double timestampfloat, timestamp;
+  //float splitfloat;
+  double timestampfloat, timestamp, splitfloat;
   string tstamps, stringdate;
   vector <string> splitstring;
 
   split(splitstring,hrs,is_any_of("."));  
   stringstream splits(splitstring.at(1));
   splits >> splitfloat; 
-  splitfloat /=1000;  
   tstamps = ""+fdate+" "+hrs+"";
-  date tstampd (from_simple_string(tstamps));
-  cout << tstampd << endl;
-  ptime timet_current(tstampd);
+  ptime tstampd = (time_from_string(tstamps));
   ptime timet_start(date(1970,1,1));
-  time_duration diff = timet_current - timet_start;
-  timestamp = diff.ticks()/time_duration::rep_type::ticks_per_second;
-  timestamp += splitfloat;
-  timestamp *=1000;
-  return timestamp;
+  time_duration const diff = tstampd - timet_start;
+  long long ms = diff.total_seconds();
+  ms *= 1000;
+  ms += splitfloat;
+  return ms;
 }
 
 bool sortbytstamp( const Quote & lhs, const Quote & rhs )

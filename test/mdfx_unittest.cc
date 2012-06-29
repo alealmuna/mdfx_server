@@ -61,8 +61,7 @@ TEST_F(CsvHandlerTest,Readcsv){
   EXPECT_EQ((float)12.144, (float)testvec.at(0).bidp);
   EXPECT_EQ(100, testvec.at(0).bids);
   EXPECT_EQ((float)18.4, (float)testvec.at(0).askp); 
-  EXPECT_EQ(1, testvec.at(0).asks); 
-  
+  EXPECT_EQ(1, testvec.at(0).asks);   
 }
 
 TEST_F(CsvHandlerTest,Fixdate){
@@ -74,7 +73,7 @@ TEST_F(CsvHandlerTest,Fixdate){
 TEST_F(CsvHandlerTest,Tostamp){
   string fdate = "2011-01-02";
   string hrs = "17:05:17.562";
-  double tstamporg = 1293987917;
+  double tstamporg = 1293987917562;
   double tstampnew = chandler.totstamp(fdate,hrs);
   EXPECT_EQ((long)tstamporg, (long)tstampnew);
 }
