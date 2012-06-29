@@ -11,6 +11,7 @@
 using std::cout;
 using std::endl;
 using std::vector;
+using std::string;
 
 void Worker::preprocessor(void) {
   CsvHandler csvhandler;

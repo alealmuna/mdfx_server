@@ -1,5 +1,9 @@
+#include <vector>
+
 #include "include/proto_handler.h"
 #include "include/hdf5_handler.h"
+
+using std::vector;
 
 void ProtoHandler::ProcessRequest(
     zmq::message_t &request, 
