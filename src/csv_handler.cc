@@ -57,7 +57,7 @@ vector<string> CsvHandler::readdir(string dir) {
         copy(directory_iterator(p), directory_iterator(), back_inserter(v));
         sort(v.begin(), v.end());
         for (vec::const_iterator it(v.begin()), it_end(v.end()); it != it_end; ++it) {
-	  regex exp("(USDJPY).*");  //Symbols to find
+	  regex exp("(EURUSD).*");  //Symbols to find
 	  filename = (it->filename()).string();
 	  if(regex_match(filename, exp))
 	    arch.push_back(filename);

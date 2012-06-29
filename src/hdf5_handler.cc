@@ -107,20 +107,21 @@ int readFromH5(vector <Quote> &result) {
     DataSet* dataset;
     DataSpace* dataspace;
     hsize_t dims_out[1];
-
+    cout << "Loading Dataset" << endl;
     dataset = new DataSet(file->openDataSet(DATASET_NAME));
     dataspace = new DataSpace(dataset->getSpace());
 
     int ndims = dataspace->getSimpleExtentDims(dims_out, NULL);
     int data_size = dims_out[0];
 
-    Quote quotes[data_size];
+    Quote *quotes;
+    quotes = new Quote[data_size];
     dataset->read(quotes, mtype1);
-
-    cout.precision(13);
+    cout << "Fetching Quotes" << endl;
     for (int i = 0; i < data_size; i++) {
        result.push_back(quotes[i]);
     }
+    cout << "Cleaning objects" << endl;
     delete dataset;
     delete file;
   }
@@ -159,23 +160,14 @@ string getFilename( vector <Quote> quotes_v ){
     return buf;
 }
 
-void filter( double start, double end, vector <Quote> &result){
-  struct request{
-    double begin_ts;
-    double end_ts;
-    double max_rel_spread;
-    char *nemo;
-  } fxrequest;
+void ProcessResponse( Fxrequest request, vector <Quote> &result){
 
   long int begin_index;
   long int end_index;
 
-  fxrequest.begin_ts = start;
-  fxrequest.end_ts = end;
-  fxrequest.max_rel_spread = 100000; 
 
-  begin_index = fxrequest.begin_ts/86000;
-  end_index = fxrequest.end_ts/86000;
+  begin_index = request.begin_ts/86000;
+  end_index = request.end_ts/86000;
 
 
   Exception::dontPrint();
@@ -211,8 +203,8 @@ void filter( double start, double end, vector <Quote> &result){
       cout.precision(20);
 
       for( int j = 0; j < data_size; j++){
-        if (((i == begin_index) and (quotes[j].tstamp >= start)) or
-           ((i == end_index)   and (quotes[j].tstamp <= end )) or
+        if (((i == begin_index) and (quotes[j].tstamp >= request.begin_ts)) or
+           ((i == end_index)   and (quotes[j].tstamp <= request.end_ts )) or
            ( i> begin_index and i < end_index ));
             result.push_back(quotes[j]);
       }
