@@ -22,7 +22,7 @@
     using namespace H5;
 #endif
 
-int writeToH5( vector <Quote> quotes_v){
+int writeToH5( vector <Quote> &quotes_v){
   
    try
    {
@@ -129,14 +129,6 @@ int readFromH5( vector <Quote> &result ){
 
       cout.precision(13);
       for( int i = 0; i < data_size; i++){
-         cout << "QUOTE " << i+1 << endl; 
-         cout << "\t timestamp:\t  " << quotes[i].tstamp << endl;
-         cout << "\t nemo:\t\t  " << quotes[i].nemo << endl;
-         cout << "\t bid_price:\t  " << quotes[i].bidp << endl;
-         cout << "\t bid_size:\t  " << quotes[i].bids << endl;
-         cout << "\t ask_price:\t  " << quotes[i].askp << endl;
-         cout << "\t ask_size:\t  " << quotes[i].asks << endl;
-         cout << endl;
          result.push_back(quotes[i]);
       }
       delete dataset;
@@ -166,37 +158,4 @@ int readFromH5( vector <Quote> &result ){
       error.printError();
       return -1;
    }
-}
-
-int main(void)
-{
-  int  i;
-  const int length = 4;
-  
-  //Quote quotes[length];
-  vector <Quote> quotes;
-  vector <Quote> iquotes;
-  Quote quote;
-
-  float raw_quotes[length][6] = { 
-    {1309469186330,1, 1.60469, 1000000, 1.60496, 1000000},
-    {1309469193426,2, 80.51000, 2000000, 80.52400, 2000000},
-    {1309469193427,3, 1.45076, 1000000, 1.45082, 1000000},
-    {1309469193440,1, 1.60468, 1000000, 1.60495, 1000000} 
-  };
-
-  for (i = 0; i< length; i++)
-  {
-     quote.tstamp = raw_quotes[i][0];
-     quote.nemo = raw_quotes[i][1];
-     quote.bidp = raw_quotes[i][2];
-     quote.bids = raw_quotes[i][3]; 
-     quote.askp = raw_quotes[i][4];
-     quote.asks = raw_quotes[i][5];
-     quotes.push_back(quote);
-  }
-
-  writeToH5(quotes);
-  readFromH5(iquotes);
-  return 0;
 }
