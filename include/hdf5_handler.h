@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 
-const H5std_string FILE_NAME( "MDFXQuotes.h5" );
 const H5std_string DATASET_NAME( "Market data FX Quotes" );
 const H5std_string TSTAMP( "timestamp" );
 const H5std_string NEMO( "symbol_nemo" );
