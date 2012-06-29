@@ -99,4 +99,4 @@ mdfx_client: protoc_interfaces_middleman src/client.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/client.cc -o bin/$@ \
 		-lzmq `pkg-config --cflags --libs protobuf`
 
-.PHONY: all test server clean distlean
+.PHONY: all test server clean distclean client
