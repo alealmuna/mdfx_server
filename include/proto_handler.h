@@ -6,8 +6,6 @@
 #include "src/protobuf/interfaces.pb.h"
 #include "constants.h"
 
-using std::vector;
-
 class ProtoHandler {
  public:
   // Reads a zmq message, parsing into to a protobuf and communicates with the
@@ -15,7 +13,7 @@ class ProtoHandler {
   void ProcessRequest(
       zmq::message_t &,
       mdfx_server::FXRequest &,
-      vector <Quote> &);
+      std::vector <Quote> &);
 };
 
 #endif  // INCLUDE_PROTO_HANDLER_H_

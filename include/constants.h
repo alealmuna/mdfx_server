@@ -8,7 +8,7 @@ enum ENUM_NEMO {
 };
 
 typedef struct {
-  float tstamp;
+  double tstamp;
   int   nemo;
   float bidp;
   float bids;
