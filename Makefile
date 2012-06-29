@@ -52,22 +52,15 @@ gtest.a : gtest-all.o
 gtest_main.a : gtest-all.o gtest_main.o
 	$(AR) $(ARFLAGS) $@ $^
 
-# Builds a sample test.  A test should link with either gtest.a or
-# gtest_main.a, depending on whether it defines its own main()
-# function.
-
 protoc_test_middleman: config/interfaces.proto
 	protoc --cpp_out=test -Iconfig config/interfaces.proto
 		@touch protoc_test_middleman
 
-sample1.o : $(SRC_DIR)/sample1.cc $(INC_DIR)/sample1.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(SRC_DIR)/sample1.cc
-
 mdfx_unittest.o : test/mdfx_unittest.cc protoc_test_middleman proto_handler.o hdf5_handler.o\
-	$(INC_DIR)/sample1.h  $(GTEST_HEADERS)
+	$(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c test/mdfx_unittest.cc `pkg-config --cflags --libs protobuf`$(BOOST)
 
-mdfx_unittest : sample1.o mdfx_unittest.o csv_handler.o hdf5_handler.o gtest_main.a
+mdfx_unittest : mdfx_unittest.o csv_handler.o hdf5_handler.o gtest_main.a
 	pkg-config --cflags protobuf  # fails if protobuf is not installed
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) test/interfaces.pb.cc \
  	-pthread $^ proto_handler.o -o bin/$@ `pkg-config --cflags --libs protobuf` $(BOOST) -lzmq
