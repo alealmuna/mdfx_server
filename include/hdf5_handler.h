@@ -3,6 +3,12 @@
 #include <vector>
 #include <string>
 
+#include "H5Cpp.h"
+#include "include/constants.h"
+
+using std::vector;
+
+const H5std_string FILE_NAME( "MDFXQuotes.h5" );
 const H5std_string DATASET_NAME( "Market data FX Quotes" );
 const H5std_string TSTAMP( "timestamp" );
 const H5std_string NEMO( "symbol_nemo" );
@@ -13,6 +19,6 @@ const H5std_string ASKS( "ask_size" );
 
 const int   RANK = 1;
 
-int writeToH(vector <Quote>);
+int writeToH5(vector <Quote> &);
 int readFromH5( vector <Quote> &);
 #endif

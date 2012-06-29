@@ -24,6 +24,7 @@
     using namespace H5;
 #endif
 
+<<<<<<< HEAD
 string getFilename( vector <Quote> quotes_v ){
     struct tm * ptm;
     double mtimestamp;
@@ -101,7 +102,7 @@ void filter( double start, double end, vector <Quote> &result){
   }
 }
 
-int writeToH5( vector <Quote> quotes_v){
+int writeToH5( vector <Quote> &quotes_v){
   
    try
    {
@@ -183,7 +184,6 @@ int readFromH5( vector <Quote> &result ){
    {
 
       Exception::dontPrint();
-      H5std_string FILE_NAME("5011.h5");
       H5File* file = new H5File( FILE_NAME, H5F_ACC_RDONLY );
 
       CompType mtype1( sizeof(Quote) );
@@ -209,14 +209,6 @@ int readFromH5( vector <Quote> &result ){
 
       cout.precision(20);
       for( int i = 0; i < data_size; i++){
-         cout << "QUOTE " << i+1 << endl; 
-         cout << "\t timestamp:\t  " << quotes[i].tstamp << endl;
-         cout << "\t nemo:\t\t  " << quotes[i].nemo << endl;
-         cout << "\t bid_price:\t  " << quotes[i].bidp << endl;
-         cout << "\t bid_size:\t  " << quotes[i].bids << endl;
-         cout << "\t ask_price:\t  " << quotes[i].askp << endl;
-         cout << "\t ask_size:\t  " << quotes[i].asks << endl;
-         cout << endl;
          result.push_back(quotes[i]);
       }
       delete dataset;
@@ -247,6 +239,7 @@ int readFromH5( vector <Quote> &result ){
       return -1;
    }
 }
+<<<<<<< HEAD
 
 int main(void)
 {
@@ -282,3 +275,5 @@ int main(void)
   filter(180956917,430986918,fquotes);
   return 0;
 }
+=======
+>>>>>>> 3455c7378d7ca757df4968fd385906433501ca27

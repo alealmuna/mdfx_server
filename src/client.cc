@@ -12,7 +12,7 @@ int main() {
 
   socket.connect("tcp://localhost:5555");
 
-  for (int request_nbr = 0; request_nbr != 5; request_nbr++) {
+  for (int request_nbr = 0; request_nbr == 0; request_nbr++) {
     // set up the request protobuf
     mdfx_server::FXRequest pb_request;
     pb_request.set_begin_timestamp(1);

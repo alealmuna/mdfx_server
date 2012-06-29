@@ -27,6 +27,10 @@ int main() {
   cout << "Amucan Market Data FX" << endl;
   s_catch_signals();
 
+  // Worker responsible of preprocessing
+  Worker initializer;
+  initializer.preprocessor();
+
   // Prepare our context and sockets
   zmq::context_t context(1);
   zmq::socket_t clients(context, ZMQ_ROUTER);
@@ -37,7 +41,7 @@ int main() {
   // Launch pool of worker threads
   for (int thread_nbr = 0; thread_nbr != 2; thread_nbr++) {
     pthread_t worker;
-    pthread_create(&worker, NULL, Worker::worker_routine,
+    pthread_create(&worker, NULL, Worker::listener,
       (reinterpret_cast<void *>(&context)));
     pthread_detach(worker);
   }
