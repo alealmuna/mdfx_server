@@ -36,13 +36,12 @@ void* Worker::listener(void *arg) {
   while (1) {
     // The response will be saved into a vector
     vector<Quote> quotes;
-    float last_quote;
 
     // Allocation for zmq and protobuff 
     zmq::message_t request;
     mdfx_server::FXRequest pb_request;
 
-    // receive the request, and parse the protocol buffer from it
+    // receive the request
     try {
       socket.recv(&request);
     } catch(zmq::error_t&) {
@@ -52,52 +51,45 @@ void* Worker::listener(void *arg) {
 
     // process the request
     phandler.ProcessRequest(request, pb_request, quotes);
-    last_quote = quotes.size() - 1;
 
     std::cout << "server: Received " << pb_request.begin_timestamp() <<
       ": " << pb_request.end_timestamp() << std::endl;
-
 
     // create a response
     mdfx_server::BBOFXQuote pb_response;
     std::string pb_serialized;
 
     // create the reply as a multipart message, transforming each vector's
-    // element into a protobuf object
-    for (size_t i = 0; i < last_quote; ++i) {
-      pb_response.set_timestamp(quotes[i].tstamp);
+    // element into a protobuf object and erasing it after
+    std::vector<Quote>::iterator it = quotes.begin();
+    while (it != quotes.end()) {
+      pb_response.set_timestamp(it->tstamp);
       pb_response.set_symbol_nemo("dummy nemo");  // map pending
-      pb_response.set_bid_price(quotes[i].bidp);
-      pb_response.set_bid_size(quotes[i].bids);
-      pb_response.set_ask_price(quotes[i].askp);
-      pb_response.set_ask_size(quotes[i].asks);
+      pb_response.set_bid_price(it->bidp);
+      pb_response.set_bid_size(it->bids);
+      pb_response.set_ask_price(it->askp);
+      pb_response.set_ask_size(it->asks);
+
+      // on-the-fly resource release
+      it = quotes.erase(it);
+
       pb_response.SerializeToString(&pb_serialized);
       zmq::message_t reply(pb_serialized.size());
       memcpy(reinterpret_cast<void *>(reply.data()), pb_serialized.c_str(),
           pb_serialized.size());
+
+      // zmq message reply
       try {
-        socket.send(reply, ZMQ_SNDMORE);
+        if (it != quotes.end()) {
+          socket.send(reply, ZMQ_SNDMORE);
+        } else {
+          // final message part
+          socket.send(reply);
+        }
       } catch(zmq::error_t&) {
         cout << zmq_strerror(errno) << endl;
         break;
       }
-    }
-    // send the final part
-    pb_response.set_timestamp(quotes[last_quote].tstamp);
-    pb_response.set_symbol_nemo("dummy nemo");  // map pending
-    pb_response.set_bid_price(quotes[last_quote].bidp);
-    pb_response.set_bid_size(quotes[last_quote].bids);
-    pb_response.set_ask_price(quotes[last_quote].askp);
-    pb_response.set_ask_size(quotes[last_quote].asks);
-    pb_response.SerializeToString(&pb_serialized);
-    zmq::message_t reply(pb_serialized.size());
-    memcpy(reinterpret_cast<void *>(reply.data()), pb_serialized.c_str(),
-        pb_serialized.size());
-    try {
-      socket.send(reply);
-    } catch(zmq::error_t&) {
-      cout << zmq_strerror(errno) << endl;
-      break;
     }
   }
   return (NULL);

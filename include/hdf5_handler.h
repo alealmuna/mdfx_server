@@ -19,4 +19,5 @@ const int   RANK = 1;
 
 int writeToH5(std::vector <Quote> &);
 int readFromH5(std::vector <Quote> &);
+int processResponse(Fxrequest, std::vector <Quote> &);
 #endif  // INCLUDE_HDF5_HANDLER_H_

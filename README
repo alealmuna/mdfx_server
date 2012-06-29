@@ -1,0 +1,32 @@
+  /***************************
+   *  Market Data FX server  *
+   ***************************/
+
+DESCRIPTION
+
+The Market Data FX server (mdfx_server) provides a query interface for clients
+to ask for orderded and filtered market quotes. The data is prepocessed 
+and stored on HDF5 files for fetching, then clients can comunicate with the 
+server through zeromq sockets using  google's protocol buffer serialized 
+messages. 
+
+DEPENDENCIES
+
+ libboost
+ protobuf 
+ zeromq
+ hdf5
+ libgoogle-perftools
+
+USAGE  
+
+  Server:
+        make
+        ./bin/mdfx_server
+
+  Client:
+        make client
+        ./bin/mdfx_client
+
+  Test:
+        make test
