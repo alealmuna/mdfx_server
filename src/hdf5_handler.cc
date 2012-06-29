@@ -24,11 +24,13 @@
     using namespace H5;
 #endif
 
-<<<<<<< HEAD
+/* Generates a filename acording to the
+   days away from epoch.*/
+
 string getFilename( vector <Quote> quotes_v ){
     struct tm * ptm;
     double mtimestamp;
-    char buf[20];
+    char   buf[20];
     time_t rawtime;
 
     Quote* quotes =  &quotes_v[0];
@@ -38,24 +40,19 @@ string getFilename( vector <Quote> quotes_v ){
     return buf;
 }
 
-void filter( double start, double end, vector <Quote> &result){
-  struct request{
-    double begin_ts;
-    double end_ts;
-    double max_rel_spread;
-    char *nemo;
-  } fxrequest;
+  /*
+   * Extract from hdf5 the sorted data. Alsod apply a filter
+   * and populates a vector of quotes.
+   */
+
+void filter(double start_ts, double end_ts, double mrs, vector <Quote> &result){
 
   long int begin_index;
   long int end_index;
 
-  fxrequest.begin_ts = start;
-  fxrequest.end_ts = end;
-  fxrequest.max_rel_spread = 100000; 
-
-  begin_index = fxrequest.begin_ts/86000;
-  end_index = fxrequest.end_ts/86000;
-
+  /* index is set accordin to the number of days from epoch.*/
+  begin_index = start_ts/86000;
+  end_index = end_ts/86000;
 
   Exception::dontPrint();
 
@@ -90,8 +87,8 @@ void filter( double start, double end, vector <Quote> &result){
       cout.precision(20);
 
       for( int j = 0; j < data_size; j++){
-        if (((i == begin_index) and (quotes[j].tstamp >= start)) or
-           ((i == end_index)   and (quotes[j].tstamp <= end )) or
+        if (((i == begin_index) and (quotes[j].tstamp >= start_ts)) or
+           ((i == end_index)   and (quotes[j].tstamp <= end_ts )) or
            ( i> begin_index and i < end_index ));
             result.push_back(quotes[j]);
       }
@@ -239,41 +236,4 @@ int readFromH5( vector <Quote> &result ){
       return -1;
    }
 }
-<<<<<<< HEAD
 
-int main(void)
-{
-  int  i;
-  const int length = 4;
-  
-  //Quote quotes[length];
-  vector <Quote> quotes;
-  vector <Quote> iquotes;
-  vector <Quote> fquotes;
-  Quote quote;
-
-  double raw_quotes[length][6] = { 
-    {430986918,1, 1.60469, 1000000, 1.60496, 1000000},
-    {134091528,2, 80.51000, 2000000, 80.52400, 2000000},
-    {430986918,3, 1.45076, 1000000, 1.45082, 1000000},
-    {430986981,1, 1.60468, 1000000, 1.60495, 1000000} 
-  };
-
-  for (i = 0; i< length; i++)
-  {
-     quote.tstamp = raw_quotes[i][0];
-     quote.nemo = raw_quotes[i][1];
-     quote.bidp = raw_quotes[i][2];
-     quote.bids = raw_quotes[i][3]; 
-     quote.askp = raw_quotes[i][4];
-     quote.asks = raw_quotes[i][5];
-     quotes.push_back(quote);
-  }
-
-  writeToH5(quotes);
-  readFromH5(iquotes);
-  filter(180956917,430986918,fquotes);
-  return 0;
-}
-=======
->>>>>>> 3455c7378d7ca757df4968fd385906433501ca27
