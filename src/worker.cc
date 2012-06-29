@@ -17,7 +17,7 @@ void Worker::preprocessor(void) {
   vector<string> files;
   vector<Quote> quotes;
 
-  files = csvhandler.readdir("/home/pantro/data");
+  files = csvhandler.readdir("/tmp/mdfx_data");
   cout << "files: " << files[0] << endl;
   quotes = csvhandler.readcsv(files);
   cout << "number of quotes: " << quotes.size() << endl;

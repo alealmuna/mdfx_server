@@ -129,14 +129,6 @@ int readFromH5( vector <Quote> &result ){
 
       cout.precision(13);
       for( int i = 0; i < data_size; i++){
-         cout << "QUOTE " << i+1 << endl; 
-         cout << "\t timestamp:\t  " << quotes[i].tstamp << endl;
-         cout << "\t nemo:\t\t  " << quotes[i].nemo << endl;
-         cout << "\t bid_price:\t  " << quotes[i].bidp << endl;
-         cout << "\t bid_size:\t  " << quotes[i].bids << endl;
-         cout << "\t ask_price:\t  " << quotes[i].askp << endl;
-         cout << "\t ask_size:\t  " << quotes[i].asks << endl;
-         cout << endl;
          result.push_back(quotes[i]);
       }
       delete dataset;
