@@ -5,25 +5,25 @@
 
 #include "include/sample1.h"
 #include "gtest/gtest.h"
-#include "include/proto_handler.h"
+//#include "include/proto_handler.h"
 #include "include/csv_handler.h"
-#include "test/interfaces.pb.h"
+//#include "test/interfaces.pb.h"
 
 using std::fstream;
 using std::ios;
-
+/*
 class FXRequestTest :  public ::testing::Test{
   protected:
   ProtoHandler phandler;
   mdfx_server::FXRequest request_in;
   mdfx_server::FXRequest request_out;
 };
-
+*/
 class CsvHandlerTest : public ::testing::Test{
   protected:
   CsvHandler chandler;
 };
-
+/*
 TEST_F(FXRequestTest,ReadProtobuf){
   fstream output("test/test_request", ios::out | ios::trunc | ios::binary);
   
@@ -35,12 +35,12 @@ TEST_F(FXRequestTest,ReadProtobuf){
   request_out.add_nemo_list("USDGBP");
   request_out.SerializeToOstream(&output);
   string filename("test/test_request");
-  EXPECT_TRUE( phandler.readRequestFromFile(filename));
+  EXPECT_TRUE(phandler.readRequestFromFile(filename));
   remove(filename.c_str());
   google::protobuf::ShutdownProtobufLibrary();
 }
-
-TEST_F(CsvHandlerTest,ReadDirectory){
+*/
+TEST_F(CsvHandlerTest, ReadDirectory){
   vector <string> files;
   //files.push_back("csvtest.csv");
   files.push_back("EURUSDbbolala.csv");
@@ -54,17 +54,26 @@ TEST_F(CsvHandlerTest,Readcsv){
   vector <Quote> testvec;
   files.push_back("EURUSDbbolala.csv");
   testvec = chandler.readcsv(files);
-  EXPECT_EQ(12.144, testvec.at(0).bidp);
-  EXPECT_EQ(13.144, testvec.at(1).bidp);
-  //chandler.sortvec(testvec);
-  EXPECT_EQ(13.144, testvec.at(0).bidp);
-  EXPECT_EQ(12.144, testvec.at(1).bidp);
+  EXPECT_EQ(1, testvec.at(0).nemo);
+  EXPECT_EQ((float)12.144, (float)testvec.at(0).bidp);
+  EXPECT_EQ(100, testvec.at(0).bids);
+  EXPECT_EQ((float)18.4, (float)testvec.at(0).askp); 
+  EXPECT_EQ(1, testvec.at(0).asks); 
+  
 }
 
 TEST_F(CsvHandlerTest,Fixdate){
   string fdate = "2011/01/03";
   string hrs = "17:05:17.562";
-  EXPECT_EQ(1294074317, chandler.fixdate(fdate, hrs));
+  EXPECT_EQ("2011-01-02", chandler.fixdate(fdate, hrs));
+}
+
+TEST_F(CsvHandlerTest,Tostamp){
+  string fdate = "2011-01-02";
+  string hrs = "17:05:17.562";
+  double tstamporg = 1293987917;
+  double tstampnew = chandler.totstamp(fdate,hrs);
+  EXPECT_EQ((long)tstamporg, (long)tstampnew);
 }
 
 //

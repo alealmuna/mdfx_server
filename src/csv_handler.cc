@@ -1,5 +1,5 @@
-#include "include/csv_handler.h"
 #include "include/constants.h"
+#include "include/csv_handler.h"
 #include <vector>
 #include <string>
 #include <sstream>
@@ -7,6 +7,7 @@
 #include <fstream>
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include <boost/regex.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/algorithm/string.hpp>
@@ -26,6 +27,8 @@ using boost::is_any_of;
 using std::transform;
 using std::back_inserter;
 using std::ifstream;
+using std::map;
+using std::sort;
 using boost::tokenizer;
 using boost::regex;
 using boost::escaped_list_separator;
@@ -83,9 +86,16 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
   vector < vector<string> > csv;
   vector <float> vec_float;
   vector<string>::const_iterator y = files.begin();
+  map<string, int> nemo_map;
+
+  // map initialization
+  nemo_map["EURUSD"] = 1;
+  nemo_map["GBPUSD"] = 2;
+  nemo_map["USDJPY"] = 3;
+
   while(y!=files.end()) {  //files cycle
     string data("test/dirtest/"+*y);
-    split(nemov,*y,is_any_of("bbo"));  //nemo
+    split(nemov,*y,is_any_of("bbo")); 
     ifstream in(data.c_str());
     if (!in.is_open()) return quotes;
     typedef tokenizer< escaped_list_separator<char> > Tokenizer;
@@ -93,7 +103,7 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
     while (getline(in,line)) {
       Tokenizer tok(line);
       vec.assign(tok.begin(),tok.end());
-      quote.tstamp = fixdate(vec.at(0), vec.at(1));
+      vec.at(0) = fixdate(vec.at(0), vec.at(1));
       istringstream bidpf(vec.at(2));
       istringstream bidsf(vec.at(3));
       istringstream askpf(vec.at(4));
@@ -102,6 +112,7 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
       bidsf >> quote.bids;
       askpf >> quote.askp;
       asksf >> quote.asks;
+      quote.nemo = nemo_map[nemov.at(0)];
       if(quote.bidp>0.0 && quote.bids>0 && quote.askp>0.0 && quote.asks>0 && quote.askp>=quote.bidp) {
         quotes.push_back(quote);
       }       
@@ -111,9 +122,9 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
   return quotes;
 }
 
-int CsvHandler::fixdate(string fdate, string hrs) {
-  int tstamp, dayint, timestamp;
-  string tstamps, stringdate;
+string CsvHandler::fixdate(string fdate, string hrs) {
+  int dayint;
+  string stringdate;
   stringstream day(hrs);
   day >> dayint;
   date daydate(from_simple_string(fdate));
@@ -121,18 +132,40 @@ int CsvHandler::fixdate(string fdate, string hrs) {
     date_duration dd(1);
     daydate = daydate - dd;
   }  
-    stringdate = to_iso_extended_string(daydate);
-    tstamps = ""+stringdate+" "+hrs+"";
-    date tstampd(from_simple_string(tstamps));
-    ptime timet_current(tstampd);
-    ptime timet_start(date(1970,1,1));
-    time_duration diff = timet_current - timet_start;
-    timestamp = diff.ticks()/time_duration::rep_type::ticks_per_second;
-    return timestamp;  	
+  stringdate = to_iso_extended_string(daydate);
+  return stringdate;  	
 }
 
-/*void CsvHandler::sortvec(vector <Quote> vec) {
-  sort(vec.rbegin(), vec.rend());  //vec sort   
-}*/
+double CsvHandler::totstamp(string fdate, string hrs) {
+  int tstamp, dayint;
+  float splitfloat;
+  double timestampfloat, timestamp;
+  string tstamps, stringdate;
+  vector <string> splitstring;
+
+  split(splitstring,hrs,is_any_of("."));  
+  stringstream splits(splitstring.at(1));
+  splits >> splitfloat; 
+  splitfloat /=1000;  
+  tstamps = ""+fdate+" "+hrs+"";
+  date tstampd (from_simple_string(tstamps));
+  cout << tstampd << endl;
+  ptime timet_current(tstampd);
+  ptime timet_start(date(1970,1,1));
+  time_duration diff = timet_current - timet_start;
+  timestamp = diff.ticks()/time_duration::rep_type::ticks_per_second;
+  timestamp += splitfloat;
+  timestamp *=1000;
+  return timestamp;
+}
+
+bool sortbytstamp( const Quote & lhs, const Quote & rhs )
+{
+   return lhs.tstamp < rhs.tstamp;
+}
+
+void CsvHandler::sortvec(vector <Quote> &vec) {
+  sort(vec.begin(), vec.end(), sortbytstamp);  //vec sort 
+}
 
  

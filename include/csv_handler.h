@@ -10,9 +10,10 @@ using std::vector;
 class CsvHandler {
   public:
     vector <Quote> readcsv(vector<string> files);
-    int fixdate(string date, string hrs);
+    string fixdate(string date, string hrs);
+    double totstamp(string date, string hrs);
     vector<string> readdir(char * dir);
-    void sortvec (vector <Quote> vec); 
+    void sortvec (vector <Quote> &); 
 };
 
 #endif  // INCLUDE_CSV_HANDLER_H_
