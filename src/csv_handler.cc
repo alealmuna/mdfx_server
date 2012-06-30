@@ -7,7 +7,7 @@
 #include <fstream>
 #include <algorithm>
 #include <iterator>
-#include <map>
+#include <boost/bimap.hpp>
 #include <boost/regex.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/algorithm/string.hpp>
@@ -27,8 +27,8 @@ using boost::is_any_of;
 using std::transform;
 using std::back_inserter;
 using std::ifstream;
-using std::map;
 using std::sort;
+using boost::bimap;
 using boost::tokenizer;
 using boost::regex;
 using boost::escaped_list_separator;
@@ -57,12 +57,12 @@ vector<string> CsvHandler::readdir(string dir) {
         copy(directory_iterator(p), directory_iterator(), back_inserter(v));
         sort(v.begin(), v.end());
         for (vec::const_iterator it(v.begin()), it_end(v.end()); it != it_end; ++it) {
-	  regex exp("(USDJPY|EURUSD).*");  //Symbols to find
-	  filename = (it->filename()).string();
-	  if(regex_match(filename, exp))
-	    arch.push_back(filename);
+          regex exp(NEMO_REGEXP);  //Symbols to find
+          filename = (*it).string();
+          if(regex_search(filename, exp))
+            arch.push_back(filename);
         }
-	return arch; // csv directory ls
+        return arch; // csv directory ls
       }
       else
         cout << p << " exists, but is neither a regular file nor a directory" << endl;
@@ -86,24 +86,26 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
   vector < vector<string> > csv;
   vector <float> vec_float;
   vector<string>::const_iterator y = files.begin();
-  map<string, int> nemo_map;
 
   // map initialization
-  nemo_map["EURUSD"] = 1;
-  nemo_map["GBPUSD"] = 2;
-  nemo_map["USDJPY"] = 3;
+  bimap<string, int> nemo_map;
+  nemo_map.insert(bimap<string, int>::value_type("EURUSD", 0));
+  nemo_map.insert(bimap<string, int>::value_type("GBPUSD", 1));
+  nemo_map.insert(bimap<string, int>::value_type("USDJPY", 2));
 
   while(y!=files.end()) {  //files cycle
-    string data("test/dirtest/"+*y);
-    split(nemov,*y,is_any_of("bbo")); 
+    string data(*y);
+    split(nemov,*y,is_any_of("bbo"));
+    split(nemov,nemov.at(0),is_any_of("/")); 
     ifstream in(data.c_str());
-    if (!in.is_open()) return quotes;
+    if (!in.is_open()) cout << "file error" << endl;
     typedef tokenizer< escaped_list_separator<char> > Tokenizer;
     string line;
     while (getline(in,line)) {
       Tokenizer tok(line);
       vec.assign(tok.begin(),tok.end());
       vec.at(0) = fixdate(vec.at(0), vec.at(1));
+      quote.tstamp = totstamp(vec.at(0), vec.at(1));
       istringstream bidpf(vec.at(2));
       istringstream bidsf(vec.at(3));
       istringstream askpf(vec.at(4));
@@ -112,11 +114,12 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
       bidsf >> quote.bids;
       askpf >> quote.askp;
       asksf >> quote.asks;
-      quote.nemo = nemo_map[nemov.at(0)];
-      if(quote.bidp>0.0 && quote.bids>0 && quote.askp>0.0 && quote.asks>0 && quote.askp>=quote.bidp) {
+      bimap<string, int>::left_const_iterator nemo_iterator;
+      nemo_iterator = nemo_map.left.find(nemov.back());
+      quote.nemo = nemo_iterator->second;
+      if(quote.bidp>0.0 && quote.bids>0 && quote.askp>0.0 && quote.asks>0 && quote.askp>=quote.bidp)
         quotes.push_back(quote);
-      }       
-    }
+    }    
     y++;  
   }
   return quotes;

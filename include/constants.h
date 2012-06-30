@@ -24,5 +24,7 @@ typedef struct {
   int *nemo;
 } Fxrequest;
 
+// List of symbols to pre-process
+#define NEMO_REGEXP "(GBPUSD|USDJPY|EURUSD)"
 
 #endif  // INCLUDE_CONSTANTS_H_

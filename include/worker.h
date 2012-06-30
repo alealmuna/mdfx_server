@@ -1,9 +1,10 @@
 #ifndef INCLUDE_WORKER_H_
 #define INCLUDE_WORKER_H_
 
+void PreProcessData(void);
+
 class Worker {
  public:
-  void preprocessor(void);
   static void *listener(void *arg);
 };
 
