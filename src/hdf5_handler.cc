@@ -20,12 +20,12 @@
     using namespace H5;
 #endif
 
-int writeToH5(vector <Quote> &quotes_v) {
+int writeToH5(vector <Quote> &quotes_v, string filename) {
   try {
     int length = quotes_v.size();
     Quote* quotes = &quotes_v[0];
     Exception::dontPrint();
-    H5std_string FILE_NAME(filename);
+//    H5std_string FILE_NAME(filename);
     /*
      * Create the data space.
      */
