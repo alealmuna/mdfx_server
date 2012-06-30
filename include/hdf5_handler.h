@@ -16,7 +16,7 @@ const H5std_string ASKP("ask_price");
 const H5std_string ASKS("ask_size");
 
 const int   RANK = 1;
-
+const double SID = 86000;
 int writeToH5(std::vector <Quote> &);
 int readFromH5(std::vector <Quote> &);
 int processResponse(Fxrequest, std::vector <Quote> &);
