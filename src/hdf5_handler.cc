@@ -171,7 +171,7 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
 
   /* index is set accordin to the number of days from epoch.*/
 
-  cout << "Procesing Response" << endl << endl;
+  cout << "Procesing Response..." << endl << endl;
 
   begin_index =  request.begin_ts/(SID*1000);
   end_index = request.end_ts/(SID*1000);
@@ -207,7 +207,6 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
       Quote quotes[data_size];
       dataset->read( quotes, mtype1 );
       cout.precision(20);
-      cout << endl<< "File " << filename << " Found" << endl;
       for( int j = 0; j < data_size; j++){
         if (((i == begin_index) and (quotes[j].tstamp >= request.begin_ts)) or
            ((i == end_index)   and (quotes[j].tstamp <= request.end_ts )) or
@@ -220,4 +219,5 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
     }catch( FileIException error ){
     }
   }
+  cout << "Dispatch!";
 }
