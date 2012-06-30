@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <fstream>
 #include <boost/bimap.hpp>
 
 #include "include/proto_handler.h"
@@ -7,6 +8,11 @@
 
 using std::vector;
 using std::string;
+using std::ios;
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::fstream;
 using boost::bimap;
 
 void ProtoHandler::ProcessRequest(
@@ -39,4 +45,30 @@ void ProtoHandler::ProcessRequest(
     }
 
     //processResponse(fxrequest, quotes);
+}
+
+bool ProtoHandler::ReadRequestFromFile(
+    string filename, 
+    mdfx_server::FXRequest &pb_request) {
+  
+  fstream input(filename.c_str(), ios::in | ios::binary);
+
+  if (!input) {
+    cout << filename << ": File not found." << endl;
+    return false;
+  }
+  if (pb_request.ParseFromIstream(&input)){
+    cerr << "Failed to parse :" << filename << endl;
+    return false;
+  }
+  
+  cout << "Reading protobuf message from " << filename << endl;
+  cout << "  begin_timestamp:" << pb_request.begin_timestamp() << endl;
+  cout << "  end_timestamp:" << pb_request.end_timestamp() << endl;
+  cout << "  max_rel_spread:" << pb_request.max_rel_spread() << endl;
+  cout << "  nemos:" << endl;
+  for ( int i = 0; i < pb_request.nemo_list_size(); i++){
+    cout << "    " <<  pb_request.nemo_list(i) << endl;
+  }
+  return true;
 }
