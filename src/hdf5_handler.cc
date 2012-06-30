@@ -3,18 +3,24 @@
 #include <iostream>
 #include <time.h>
 
+#ifndef H5_NO_NAMESPACE
+#ifndef H5_NO_STD
     using std::cout;
     using std::endl;
     using std::vector;
     using std::string;
+#endif  // H5_NO_STD
+#endif
 
 #include "H5Cpp.h"
 #include "include/hdf5_handler.h"
 #include "include/constants.h"
 
+#ifndef H5_NO_NAMESPACE
     using namespace H5;
+#endif
 
-int writeToH5(vector <Quote> &quotes_v, H5std_string FILE_NAME) {
+int writeToH5(vector <Quote> &quotes_v) {
   try {
     int length = quotes_v.size();
     Quote* quotes = &quotes_v[0];
@@ -24,7 +30,6 @@ int writeToH5(vector <Quote> &quotes_v, H5std_string FILE_NAME) {
      */
     hsize_t dim[] = {length};   /* Dataspace dimensions */
     DataSpace space(RANK, dim);
-
     /*
      * Create the file.
      */
@@ -146,7 +151,7 @@ int readFromH5(vector <Quote> &result) {
    * sorted by day
    */
 
-string getFilename( vector <Quote> &quotes_v ){
+string get_filename( vector <Quote> &quotes_v ){
     struct tm * ptm;
     double mtimestamp;
     char   buf[20];
