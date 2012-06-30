@@ -1,12 +1,13 @@
 #include <zmq.hpp>
+#include <cstdio>
 #include <iostream>
+
+using std::cout;
 
 #include "src/protobuf/interfaces.pb.h"
 
-using std::cout;
-using std::endl;
-
 int main() {
+  printf("Starting client...\n");
   zmq::context_t context(1);
   zmq::socket_t socket(context, ZMQ_REQ);
 
@@ -30,8 +31,10 @@ int main() {
   memcpy(reinterpret_cast<void *>(request.data()), pb_serialized.c_str(),
       pb_serialized.size());
 
+  printf("Sending request...\n");
   socket.send(request);
 
+  printf("Waiting for response...\n");
   while (1) {
     // create and receive the reply
     zmq::message_t reply;
@@ -42,12 +45,13 @@ int main() {
     pb_response.ParseFromArray(reply.data(), reply.size());
 
     // print each quote received
-    cout << pb_response.timestamp() << ",\t" <<
-      pb_response.symbol_nemo() << ",\t" <<
-      pb_response.bid_price() << ",\t" <<
-      pb_response.bid_size() << ",\t" <<
-      pb_response.ask_price() << ",\t" <<
-      pb_response.ask_size() << endl;
+    printf("%15li, %10s, %10f, %10i, %10f, %10i",
+        pb_response.timestamp(),
+        pb_response.symbol_nemo().c_str(),
+        pb_response.bid_price(),
+        pb_response.bid_size(),
+        pb_response.ask_price(),
+        pb_response.ask_size());
 
     int64_t more;
     size_t more_size = sizeof(more);
@@ -56,7 +60,7 @@ int main() {
       break;  //  Last message part
   }
 
-  cout << "Exiting..." << endl;
+  printf("Exiting...\n");
 
   return 0;
 }
