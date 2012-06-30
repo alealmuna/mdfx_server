@@ -107,7 +107,7 @@ int readFromH5(vector <Quote> &result) {
     DataSet* dataset;
     DataSpace* dataspace;
     hsize_t dims_out[1];
-    cout << "Loading Dataset" << endl;
+    cout << "Loading query data from files" << endl;
     dataset = new DataSet(file->openDataSet(DATASET_NAME));
     dataspace = new DataSpace(dataset->getSpace());
 

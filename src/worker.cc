@@ -13,15 +13,16 @@ using std::endl;
 using std::vector;
 using std::string;
 
-void Worker::preprocessor(void) {
+void PreProcessData(void) {
   CsvHandler csvhandler;
   vector<string> files;
   vector<Quote> quotes;
 
+  cout << "Looking for files" << endl;
   files = csvhandler.readdir("/tmp/mdfx_data");
-  cout << "files: " << files[0] << endl;
+  cout << "loading file: " << files[0] << endl;
   quotes = csvhandler.readcsv(files);
-  cout << "number of quotes: " << quotes.size() << endl;
+  cout << "[Loading Finished] Number of quotes: " << quotes.size() << endl;
   writeToH5(quotes);
 }
 
