@@ -21,7 +21,7 @@ typedef struct {
   double begin_ts;
   double end_ts;
   double max_rel_spread;
-  char *nemo;
+  int *nemo;
 } Fxrequest;
 
 
