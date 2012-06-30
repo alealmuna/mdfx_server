@@ -20,12 +20,54 @@
     using namespace H5;
 #endif
 
+  /*
+   * Coverts a milisecond timestamp to
+   * the number of the days since 1900.
+   */
+
+double dayFromEpoch(double tstamp){
+  double day;
+  day =  int (tstamp/(SID*1000));
+  return day;
+}
+
+  /*
+   *  Separate the quote vector in small vectors
+   *  per day.
+   */
+
+int writeToH5perDay(vector <Quote> &quotes_v){
+  double last_date;
+  double quote_date;
+  int status = 0;
+  vector <Quote> dailyq;
+
+  last_date = dayFromEpoch(quotes_v[0].tstamp);
+  while(0<quotes_v.size()) {
+    quote_date = dayFromEpoch(quotes_v[0].tstamp);
+    if (quote_date == last_date){
+      /* last quote insert the remain vector */
+      dailyq.push_back(quotes_v[0]);
+      if (quotes_v.size()==1){
+        status =  writeToH5(dailyq ,get_filename(dailyq));
+        dailyq.clear();
+      }
+    }else{
+      status = writeToH5(dailyq ,get_filename(dailyq));
+      last_date = quote_date;
+      dailyq.clear();
+      dailyq.push_back(quotes_v[0]);
+    };
+    quotes_v.erase(quotes_v.begin());
+  };
+}
+
 int writeToH5(vector <Quote> &quotes_v, string filename) {
   try {
     int length = quotes_v.size();
     Quote* quotes = &quotes_v[0];
     Exception::dontPrint();
-//    H5std_string FILE_NAME(filename);
+    H5std_string FILENAME(filename);
     /*
      * Create the data space.
      */
@@ -34,7 +76,8 @@ int writeToH5(vector <Quote> &quotes_v, string filename) {
     /*
      * Create the file.
      */
-    H5File* file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
+    cout << "filename" << filename << endl;
+    H5File* file = new H5File(FILENAME, H5F_ACC_TRUNC);
 
     /*
      * Create the memory datatype.
@@ -125,7 +168,6 @@ int readFromH5(vector <Quote> &result) {
     delete dataset;
     delete file;
   }
-
   catch(FileIException error) {
     error.printError();
     return -1;
@@ -155,14 +197,25 @@ int readFromH5(vector <Quote> &result) {
 string get_filename( vector <Quote> &quotes_v ){
     struct tm * ptm;
     double mtimestamp;
-    char   buf[20];
+    char   buf[40];
     time_t rawtime;
+    string datapath = "/home/oscar/src/mdfx_server/data/";
 
     Quote* quotes =  &quotes_v[0];
     mtimestamp = quotes[0].tstamp;
     mtimestamp =  mtimestamp/(SID*1000);
     sprintf(buf,"%d.h5",(int) mtimestamp);
-    return buf;
+    datapath += buf;
+//    return buf;
+    return datapath;
+}
+
+string format_filename(int index){
+    char buf[40];
+    string datapath = "/home/oscar/src/mdfx_server/data/";
+    sprintf(buf,"%d.h5", index);
+    datapath += buf;
+    return datapath;
 }
 
   /*
@@ -192,15 +245,16 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
   mtype1.insertMember( ASKP, HOFFSET(Quote, askp), PredType::NATIVE_FLOAT);
   mtype1.insertMember( ASKS, HOFFSET(Quote, asks), PredType::NATIVE_FLOAT);
 
+
   DataSet* dataset;
   DataSpace* dataspace;
   hsize_t dims_out[1];
 
   for (int i = begin_index; i <= end_index; i++){
-    char filename[10];
-    sprintf(filename,"%d.h5",(int) i);
+//    char filename[10];
+//    sprintf(filename,"%d.h5",(int) i);
     try{
-      H5std_string FILE_NAME(filename);
+      H5std_string FILE_NAME(format_filename(i));
       H5File* file = new H5File(FILE_NAME,
                                 H5F_ACC_RDONLY );
 
@@ -225,5 +279,5 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
     }catch( FileIException error ){
     }
   }
-  cout << "Dispatch!";
+  cout << "Dispatch!" << endl << endl;
 }
