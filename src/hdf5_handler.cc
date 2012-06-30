@@ -3,24 +3,18 @@
 #include <iostream>
 #include <time.h>
 
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
     using std::cout;
     using std::endl;
     using std::vector;
     using std::string;
-#endif  // H5_NO_STD
-#endif
 
 #include "H5Cpp.h"
 #include "include/hdf5_handler.h"
 #include "include/constants.h"
 
-#ifndef H5_NO_NAMESPACE
     using namespace H5;
-#endif
 
-int writeToH5(vector <Quote> &quotes_v) {
+int writeToH5(vector <Quote> &quotes_v, H5std_string FILE_NAME) {
   try {
     int length = quotes_v.size();
     Quote* quotes = &quotes_v[0];
@@ -152,7 +146,7 @@ int readFromH5(vector <Quote> &result) {
    * sorted by day
    */
 
-string getFilename( vector <Quote> quotes_v ){
+string getFilename( vector <Quote> &quotes_v ){
     struct tm * ptm;
     double mtimestamp;
     char   buf[20];
@@ -160,7 +154,7 @@ string getFilename( vector <Quote> quotes_v ){
 
     Quote* quotes =  &quotes_v[0];
     mtimestamp = quotes[0].tstamp;
-    mtimestamp =(int) mtimestamp/86000;
+    mtimestamp =  mtimestamp/(SID*1000);
     sprintf(buf,"%d.h5",(int) mtimestamp);
     return buf;
 }
@@ -177,8 +171,10 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
 
   /* index is set accordin to the number of days from epoch.*/
 
-  begin_index = request.begin_ts/86000;
-  end_index = request.end_ts/86000;
+  cout << "Procesing Response" << endl << endl;
+
+  begin_index =  request.begin_ts/(SID*1000);
+  end_index = request.end_ts/(SID*1000);
 
   Exception::dontPrint();
 
@@ -198,11 +194,11 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
     char filename[10];
     sprintf(filename,"%d.h5",(int) i);
     try{
-
       H5std_string FILE_NAME(filename);
-      H5File* file = new H5File( FILE_NAME, H5F_ACC_RDONLY );
+      H5File* file = new H5File(FILE_NAME,
+                                H5F_ACC_RDONLY );
 
-      dataset = new DataSet (file->openDataSet( DATASET_NAME ));
+      dataset = new DataSet( file->openDataSet(DATASET_NAME ));
       dataspace = new DataSpace (dataset->getSpace());
 
       int ndims = dataspace->getSimpleExtentDims( dims_out, NULL);
@@ -211,12 +207,13 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
       Quote quotes[data_size];
       dataset->read( quotes, mtype1 );
       cout.precision(20);
-
+      cout << endl<< "File " << filename << " Found" << endl;
       for( int j = 0; j < data_size; j++){
         if (((i == begin_index) and (quotes[j].tstamp >= request.begin_ts)) or
            ((i == end_index)   and (quotes[j].tstamp <= request.end_ts )) or
-           ( i> begin_index and i < end_index ));
-            result.push_back(quotes[j]);
+           ( i> begin_index and i < end_index )){
+          result.push_back(quotes[j]);
+        }
       }
       delete dataset;
       delete file;
