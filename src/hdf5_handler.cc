@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <time.h>
+#include <math.h>
 
 #ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
@@ -76,7 +77,6 @@ int writeToH5(vector <Quote> &quotes_v, string filename) {
     /*
      * Create the file.
      */
-    cout << "filename" << filename << endl;
     H5File* file = new H5File(FILENAME, H5F_ACC_TRUNC);
 
     /*
@@ -199,7 +199,8 @@ string get_filename( vector <Quote> &quotes_v ){
     double mtimestamp;
     char   buf[40];
     time_t rawtime;
-    string datapath = "/home/oscar/src/mdfx_server/data/";
+    string datapath = "/data/";
+//    string datapath = "/home/oscar/src/mdfx_server/data/";
 
     Quote* quotes =  &quotes_v[0];
     mtimestamp = quotes[0].tstamp;
@@ -210,12 +211,48 @@ string get_filename( vector <Quote> &quotes_v ){
     return datapath;
 }
 
+  /*
+   * Check if the instrument belogs to the 
+   * provided list.
+   */
+bool nemo_in(int * nemo_lst, int value){
+  for (int i = 0; i < 4;i++){
+    if (nemo_lst[i] == value)
+      return true;
+  }
+  return false;
+}
+  /*
+   * Generates a file_path based on a double.
+   */
 string format_filename(int index){
     char buf[40];
-    string datapath = "/home/oscar/src/mdfx_server/data/";
+//    string datapath = "/home/oscar/src/mdfx_server/data/";
+    string datapath = "/data/";
     sprintf(buf,"%d.h5", index);
     datapath += buf;
     return datapath;
+}
+
+  /*
+   * Evaluates if a quote is according
+   * to the restrictions.
+   */
+
+bool is_valid_q(Quote &quote, double mrs){
+  bool mrs_flag = quote.askp/quote.bidp >= exp(1 + mrs);
+  cout <<"flag:"<< mrs_flag << " " << quote.bidp << endl;
+  cout <<"data: " << quote.bidp << " " << quote.askp;
+  cout <<"price logic: "<< (quote.bidp > quote.askp) << endl;
+  cout <<"bidp and askp: "<< ((quote.bidp <= 0) or (quote.askp <= 0)) << endl;
+  cout <<"bids adn asks: "<<((quote.bids <= 0) or (quote.asks <= 0)) << endl;
+  if ((quote.bidp <= 0) or (quote.askp <= 0) or
+     (quote.bids <= 0) or (quote.asks <= 0) or
+     (quote.bidp > quote.askp) or mrs_flag)
+      cout << "FALSE!" << endl;
+      return false;
+  cout << "valid";
+  return true;
 }
 
   /*
@@ -251,8 +288,6 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
   hsize_t dims_out[1];
 
   for (int i = begin_index; i <= end_index; i++){
-//    char filename[10];
-//    sprintf(filename,"%d.h5",(int) i);
     try{
       H5std_string FILE_NAME(format_filename(i));
       H5File* file = new H5File(FILE_NAME,
@@ -268,11 +303,12 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
       dataset->read( quotes, mtype1 );
       cout.precision(20);
       for( int j = 0; j < data_size; j++){
-        if (((i == begin_index) and (quotes[j].tstamp >= request.begin_ts)) or
-           ((i == end_index)   and (quotes[j].tstamp <= request.end_ts )) or
-           ( i> begin_index and i < end_index )){
-          result.push_back(quotes[j]);
-        }
+        if  ((((i == begin_index) and (quotes[j].tstamp >= request.begin_ts)) or
+            ((i == end_index)   and (quotes[j].tstamp <= request.end_ts )) or
+            ( i> begin_index and i < end_index )) and 
+             nemo_in(request.nemo,quotes[j].nemo)){
+//             is_valid_q(quotes[j],request.max_rel_spread)){
+             result.push_back(quotes[j]);};
       }
       delete dataset;
       delete file;
