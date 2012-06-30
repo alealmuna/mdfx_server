@@ -1,4 +1,5 @@
 #include <zmq.hpp>
+#include <boost/bimap.hpp>
 #include <iostream>
 
 #include "include/worker.h"
@@ -12,16 +13,18 @@ using std::cout;
 using std::endl;
 using std::vector;
 using std::string;
+using boost::bimap;
 
 void Worker::preprocessor(void) {
   CsvHandler csvhandler;
   vector<string> files;
   vector<Quote> quotes;
 
-  files = csvhandler.readdir("/tmp/mdfx_data");
-  cout << "files: " << files[0] << endl;
+  files = csvhandler.readdir("data");
   quotes = csvhandler.readcsv(files);
   cout << "number of quotes: " << quotes.size() << endl;
+  csvhandler.sortvec(quotes);
+  cout << "sorted" << endl;
   writeToH5(quotes);
 }
 
@@ -32,6 +35,12 @@ void* Worker::listener(void *arg) {
   socket.connect("inproc://workers");
 
   ProtoHandler phandler;
+
+  // map initialization
+  bimap<string, int> nemo_map;
+  nemo_map.insert(bimap<string, int>::value_type("EURUSD", 0));
+  nemo_map.insert(bimap<string, int>::value_type("GBPUSD", 1));
+  nemo_map.insert(bimap<string, int>::value_type("USDJPY", 2));
 
   while (1) {
     // The response will be saved into a vector
@@ -65,7 +74,10 @@ void* Worker::listener(void *arg) {
     // element into a protobuf object
     for (size_t i = 0; i < last_quote; ++i) {
       pb_response.set_timestamp(quotes[i].tstamp);
-      pb_response.set_symbol_nemo("dummy nemo");  // map pending
+      // mapping nemo
+      bimap<string, int>::right_const_iterator nemo_iterator;
+      nemo_iterator = nemo_map.right.find(quotes[i].nemo);
+      pb_response.set_symbol_nemo(nemo_iterator->second);
       pb_response.set_bid_price(quotes[i].bidp);
       pb_response.set_bid_size(quotes[i].bids);
       pb_response.set_ask_price(quotes[i].askp);
@@ -82,8 +94,11 @@ void* Worker::listener(void *arg) {
       }
     }
     // send the final part
+    // mapping nemo
+    bimap<string, int>::right_const_iterator nemo_iterator;
+    nemo_iterator = nemo_map.right.find(quotes[last_quote].nemo);
+    pb_response.set_symbol_nemo(nemo_iterator->second);
     pb_response.set_timestamp(quotes[last_quote].tstamp);
-    pb_response.set_symbol_nemo("dummy nemo");  // map pending
     pb_response.set_bid_price(quotes[last_quote].bidp);
     pb_response.set_bid_size(quotes[last_quote].bids);
     pb_response.set_ask_price(quotes[last_quote].askp);
