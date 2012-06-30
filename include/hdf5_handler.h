@@ -20,4 +20,5 @@ const double SID = 86000;
 int writeToH5(std::vector <Quote> &);
 int readFromH5(std::vector <Quote> &);
 int processResponse(Fxrequest, std::vector <Quote> &);
+string get_filename( std::vector <Quote> &);
 #endif  // INCLUDE_HDF5_HANDLER_H_
