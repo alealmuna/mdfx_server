@@ -47,12 +47,14 @@ void PromptForRequest(mdfx_server::FXRequest* request) {
 
 int main(int argc, char* argv[]) {
   // Wrong arguments case
-  if ((argc != 1) && !(argc == 3 && !strcmp(argv[1], "--create-request"))){
+  if (((argc != 1) && (argc != 2) && !(argc == 3 
+      && !strcmp(argv[1], "--create-request")))
+      || ((argc == 2) && !strcmp(argv[1],"--create-request"))){
     cout << "Wrong parameters" << endl;
     cout << "usage: " << endl;
     cout << "       " << "mdfx_client" << endl;
-    cout << "       " << "mdfx_client --request <filename>" << endl;
-    cout << "       " << "mdfx_client --create-request <filename>" << endl;
+    cout << "       " << "mdfx_client <request file>" << endl;
+    cout << "       " << "mdfx_client --create-request <request file>" << endl;
     return 0;
   }
 
@@ -78,16 +80,24 @@ int main(int argc, char* argv[]) {
       cout << "  Send the request by running:" << endl;
       cout << endl;
       cout << "                     mdfx_client --request " << filename << endl;
-      return 0;
+      cout << endl;
+      string user_in("");
+      do {
+        cout << "Would you like to send the request now? [Y/n]";
+        getline(cin, user_in);
+        if (!strcmp(user_in.c_str(),"n"))  return 0;
+        if (!strcmp(user_in.c_str(),"Y") || !strcmp(user_in.c_str(),"y") 
+          || !strcmp(user_in.c_str(),"")) break;
+      } while (1);
     }
   }
-  else if (argc == 2) {
+  else if ((argc == 2) && strcmp(argv[1], "--create-request")){
     string filename(argv[1]);
-    if(!phandler.ReadRequestFromFile(filename, pb_request)) return 0;
+    if(phandler.ReadRequestFromFile(filename, pb_request))return 0;
   } 
-  else  {
+  else  
     PromptForRequest(&pb_request);
-  }
+  
 
   socket.connect("tcp://localhost:5555");
 
