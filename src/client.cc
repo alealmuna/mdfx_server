@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
     pb_response.ParseFromArray(reply.data(), reply.size());
 
     // print each quote received
-    printf("%15li, %10s, %10f, %10i, %10f, %10i",
+    printf("%15li, %10s, %10f, %10i, %10f, %10i\n",
         pb_response.timestamp(),
         pb_response.symbol_nemo().c_str(),
         pb_response.bid_price(),
