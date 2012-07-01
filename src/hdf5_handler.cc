@@ -247,10 +247,38 @@ bool is_valid_q(Quote &quote, double mrs){
      (quote.bids <= 0) or (quote.asks <= 0) or
      (quote.bidp > quote.askp) or mrs_flag)
       return false;
-  cout << "valid";
   return true;
 }
 
+  /*
+   * Evaluates if a quote is valid according to
+   * the date range required.
+   */
+
+bool is_candidate(Quote &quote, Fxrequest request,
+                  long int bgn_indx, long int end_indx,
+                  int current){
+
+  bool first_doc;
+  bool last_doc;
+  bool qu_over;
+  bool qu_under;
+  bool qu_between;
+
+  first_doc = (current == bgn_indx);
+  last_doc = ( current == end_indx);
+  qu_over = (quote.tstamp >= request.begin_ts);
+  qu_under = (quote.tstamp <= request.end_ts );
+  qu_between = ( current > bgn_indx and current < end_indx );
+
+  if ((first_doc and qu_over) or
+     (last_doc and qu_under) or
+     (qu_between)){
+    return true;
+  };
+  return false;
+}
+  
   /*
    * Extract from hdf5 the sorted data. Also apply a filter
    * and populates a vector of quotes.
@@ -258,18 +286,18 @@ bool is_valid_q(Quote &quote, double mrs){
 
 void ProcessResponse( Fxrequest request, vector <Quote> &result){
 
-  long int begin_index;
-  long int end_index;
+  long int bgn_indx;
+  long int end_indx;
 
   /* index is set accordin to the number of days from epoch.*/
 
   cout << "Procesing Response..." << endl << endl;
 
-  begin_index =  request.begin_ts/(SID);
-  end_index = request.end_ts/(SID);
+  bgn_indx =  request.begin_ts/(SID);
+  end_indx = request.end_ts/(SID);
 
-  cout << "Begin Index:" << begin_index << endl;
-  cout << "End Index: " << end_index << endl;
+  cout << "Begin Index:" << bgn_indx << endl;
+  cout << "End Index: " << end_indx << endl;
 
   Exception::dontPrint();
 
@@ -286,7 +314,7 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
   DataSpace* dataspace;
   hsize_t dims_out[1];
 
-  for (int i = begin_index; i <= end_index; i++){
+  for (int i = bgn_indx; i <= end_indx; i++){
     try{
       H5std_string FILE_NAME(format_filename(i));
       H5File* file = new H5File(FILE_NAME,
@@ -300,16 +328,14 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
 
       Quote quotes[data_size];
       dataset->read( quotes, mtype1 );
-      cout.precision(20);
+
       for( int j = 0; j < data_size; j++){
-//        if  ((((i == begin_index) and (quotes[j].tstamp >= request.begin_ts)) or
-//            ((i == end_index)   and (quotes[j].tstamp <= request.end_ts )) or
-//            ( i> begin_index and i < end_index )) and 
+        if (is_candidate(quotes[j], request, bgn_indx, end_indx, i)){
 //             nemo_in(request.nemo,quotes[j].nemo)){
 //             is_valid_q(quotes[j],request.max_rel_spread)){
                   result.push_back(quotes[j]);
-//        }
-      }
+        };
+      };
       delete dataset;
       delete file;
     }catch( FileIException error ){
@@ -317,3 +343,4 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
   }
   cout << "Dispatch!" << endl << endl;
 }
+
