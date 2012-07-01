@@ -21,12 +21,15 @@ DEPENDENCIES
 USAGE  
 
   Server:
-        make
-        ./bin/mdfx_server
+    make                            // Compile
+    ./bin/mdfx_server               // Run server
+    ./bin/mdfx_server --pre         // Preprocess data
 
   Client:
-        make client
-        ./bin/mdfx_client
+    make client                         // Compile client
+    ./bin/mdfx_client                   // Send prompted request 
+    ./bin/mdfx_client <filename>        // Send protobuf request file
+    ./bin/mdfx_client --create-request  // Create protobuf request file
 
   Test:
         make test
