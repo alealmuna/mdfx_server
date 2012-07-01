@@ -26,7 +26,6 @@ void PreProcessData(void) {
   cout << "[Loading Finished] Number of quotes: " << quotes.size() << endl;
   csvhandler.sortvec(quotes);
   cout << "Quotes sorted" << endl;
-  string filename("processed_data.h5");
   writeToH5perDay(quotes);
 }
 
@@ -64,7 +63,7 @@ void* Worker::listener(void *arg) {
     // process the request
     phandler.ProcessRequest(request, pb_request, quotes);
     last_quote = quotes.size() - 1;  // we need the index in the vector
-
+    cout << "Number of quotes to send :" << quotes.size() <<endl;;
     std::cout << "server: Received " << pb_request.begin_timestamp() <<
       ": " << pb_request.end_timestamp() << std::endl;
 
