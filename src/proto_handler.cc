@@ -44,7 +44,7 @@ void ProtoHandler::ProcessRequest(
       fxrequest.nemo[i] = nemo_iterator->second;
     }
 
-    //processResponse(fxrequest, quotes);
+    ProcessResponse(fxrequest, quotes);
 }
 
 bool ProtoHandler::ReadRequestFromFile(
@@ -57,7 +57,7 @@ bool ProtoHandler::ReadRequestFromFile(
     cout << filename << ": File not found." << endl;
     return false;
   }
-  if (pb_request.ParseFromIstream(&input)){
+  if (!pb_request.ParseFromIstream(&input)){
     cerr << "Failed to parse :" << filename << endl;
     return false;
   }

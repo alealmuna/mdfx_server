@@ -303,12 +303,13 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
       dataset->read( quotes, mtype1 );
       cout.precision(20);
       for( int j = 0; j < data_size; j++){
-        if  ((((i == begin_index) and (quotes[j].tstamp >= request.begin_ts)) or
-            ((i == end_index)   and (quotes[j].tstamp <= request.end_ts )) or
-            ( i> begin_index and i < end_index )) and 
-             nemo_in(request.nemo,quotes[j].nemo)){
+//        if  ((((i == begin_index) and (quotes[j].tstamp >= request.begin_ts)) or
+//            ((i == end_index)   and (quotes[j].tstamp <= request.end_ts )) or
+//            ( i> begin_index and i < end_index )) and 
+//             nemo_in(request.nemo,quotes[j].nemo)){
 //             is_valid_q(quotes[j],request.max_rel_spread)){
-             result.push_back(quotes[j]);};
+             result.push_back(quotes[j]);
+//             };
       }
       delete dataset;
       delete file;

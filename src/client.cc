@@ -1,58 +1,98 @@
 #include <cstdio>
 #include <iostream>
 #include <string>
+#include <fstream>
 #include <zmq.hpp>
 
 using std::cout;
+using std::cerr;
+using std::cin;
 using std::endl;
+using std::ios;
+using std::fstream;
+using std::string;
 
 #include "src/protobuf/interfaces.pb.h"
 #include "include/proto_handler.h"
 
+void PromptForRequest(mdfx_server::FXRequest* request) {
+  cout << "Enter begin timestamp: ";
+  double begin_ts;
+  cin >> begin_ts;
+  cin.ignore(256, '\n');
+  request->set_begin_timestamp(begin_ts);
+
+  cout << "Enter end timestamp: ";
+  double end_ts;
+  cin >> end_ts;
+  request->set_end_timestamp(end_ts);
+  cin.ignore(256, '\n');
+  
+  cout << "Enter max_rel_spread: ";
+  float max_rel_spread;
+  cin >> max_rel_spread;
+  request->set_max_rel_spread(max_rel_spread);
+  cin.ignore(256, '\n');
+  
+  while (true) {
+    cout << "Enter a nemo (or leave blank to finish): ";
+    string nemo;
+    getline(cin, nemo);
+    if (nemo.empty()) {
+      break;
+    }
+    request->add_nemo_list(nemo);
+  }
+}
+
 int main(int argc, char* argv[]) {
   // Wrong arguments case
-  if ((argc != 1) || (argc == 3 && !strcmp(argv[1], "-proto"))){
+  if ((argc != 1) && !(argc == 3 && !strcmp(argv[1], "--create-request"))){
     cout << "Wrong parameters" << endl;
     cout << "usage: " << endl;
     cout << "       " << "mdfx_client" << endl;
-    cout << "       " << "mdfx_client -proto <filename>" << endl;
+    cout << "       " << "mdfx_client --request <filename>" << endl;
+    cout << "       " << "mdfx_client --create-request <filename>" << endl;
     return 0;
   }
+
   printf("Starting client...\n");
 
   zmq::context_t context(1);
   zmq::socket_t socket(context, ZMQ_REQ);
 
-  socket.connect("tcp://localhost:5555");
-
   mdfx_server::FXRequest pb_request;
   ProtoHandler phandler;
   // Load request from file 
-  if (argc == 3 && !strcmp(argv[1], "-proto")) {
-    std::string filename(argv[2]);
-    cout << "Loading request from file :" << filename << endl;
+  if(argc == 3 && !strcmp(argv[1], "--create-request")){
+    PromptForRequest(&pb_request);
+    string filename(argv[2]);
+    fstream output(filename.c_str(), ios::out | ios::trunc | ios::binary);
+    if (!pb_request.SerializeToOstream(&output)) {
+      cerr << "Failed to write request." << endl;
+      return -1;
+    }
+    else {
+      cout << endl << endl;
+      cout << "  Request created on file:   " << filename << endl << endl;
+      cout << "  Send the request by running:" << endl;
+      cout << endl;
+      cout << "                     mdfx_client --request " << filename << endl;
+      return 0;
+    }
+  }
+  else if (argc == 2) {
+    string filename(argv[1]);
     if(!phandler.ReadRequestFromFile(filename, pb_request)) return 0;
-  } else {
-    cout << "Using test request"  << endl;
-    // set up the request protobuf
-    pb_request.set_begin_timestamp(1293874200);
-    pb_request.set_end_timestamp(1320080700);
-    pb_request.set_max_rel_spread(0.01);
-    pb_request.add_nemo_list("EURUSD");
-    pb_request.add_nemo_list("GBPUSD");
-    pb_request.add_nemo_list("USDJPY");
-    
-    cout << "  begin_timestamp: 1293874200" << endl;
-    cout << "  end_timestamp: 1320080700" << endl;
-    cout << "  max_rel_spread: 0.01" << endl;
-    cout << "  nemos:" << endl;
-    cout << "         EURUSD" << endl; 
-    cout << "         GBPUSD" << endl; 
-    cout << "         USDJPY" << endl; 
+  } 
+  else  {
+    PromptForRequest(&pb_request);
   }
 
+  socket.connect("tcp://localhost:5555");
+
   // serialize the request to a string
-  std::string pb_serialized;
+  string pb_serialized;
   pb_request.SerializeToString(&pb_serialized);
 
   // create and send the zmq message
