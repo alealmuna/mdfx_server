@@ -26,7 +26,7 @@ void PreProcessData(void) {
   cout << "[Loading Finished] Number of quotes: " << quotes.size() << endl;
   csvhandler.sortvec(quotes);
   cout << "Quotes sorted" << endl;
-  string filename("/processed_data/");
+  string filename("processed_data.h5");
   writeToH5(quotes, filename);
 }
 

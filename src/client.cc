@@ -1,26 +1,55 @@
-#include <zmq.hpp>
 #include <cstdio>
 #include <iostream>
+#include <string>
+#include <zmq.hpp>
 
 using std::cout;
+using std::endl;
 
 #include "src/protobuf/interfaces.pb.h"
+#include "include/proto_handler.h"
 
-int main() {
+int main(int argc, char* argv[]) {
+  // More than 2 arguments
+  if ((argc != 2 && argc != 3) || (argc != 3 || strcmp(argv[1], "-proto"))){
+    cout << "Wrong parameters" << endl;
+    cout << "usage: " << endl;
+    cout << "       " << "mdfx_client" << endl;
+    cout << "       " << "mdfx_client -proto <filename>" << endl;
+    return 0;
+  }
   printf("Starting client...\n");
+
   zmq::context_t context(1);
   zmq::socket_t socket(context, ZMQ_REQ);
 
   socket.connect("tcp://localhost:5555");
 
-  // set up the request protobuf
   mdfx_server::FXRequest pb_request;
-  pb_request.set_begin_timestamp(1293874200);
-  pb_request.set_end_timestamp(1320080700);
-  pb_request.set_max_rel_spread(0.01);
-  pb_request.add_nemo_list("EURUSD");
-  pb_request.add_nemo_list("GBPUSD");
-  pb_request.add_nemo_list("USDJPY");
+  ProtoHandler phandler;
+  // Load request from file 
+  if (argc == 3 && !strcmp(argv[1], "-proto")) {
+    std::string filename(argv[2]);
+    cout << "Loading request from file :" << filename << endl;
+    if(!phandler.ReadRequestFromFile(filename, pb_request)) return 0;
+  } else {
+    cout << "Using test request"  << endl;
+    // set up the request protobuf
+    pb_request.set_begin_timestamp(1293874200);
+    pb_request.set_end_timestamp(1320080700);
+    pb_request.set_max_rel_spread(0.01);
+    pb_request.add_nemo_list("EURUSD");
+    pb_request.add_nemo_list("GBPUSD");
+    pb_request.add_nemo_list("USDJPY");
+    
+    cout << "  begin_timestamp: 1293874200" << endl;
+    cout << "  end_timestamp: 1320080700" << endl;
+    cout << "  max_rel_spread: 0.01" << endl;
+    cout << "  nemos:" << endl;
+    cout << "         EURUSD" << endl; 
+    cout << "         GBPUSD" << endl; 
+    cout << "         USDJPY" << endl; 
+  }
 
   // serialize the request to a string
   std::string pb_serialized;

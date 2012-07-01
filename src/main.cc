@@ -36,9 +36,9 @@ int main(int argc, char* argv[]) {
     cout << "       " << "mdfx-server -pre" << endl;
     return 0;
   }
-  // Worker responsible of preprocessing
+  // Preprocess data
   if (argc == 2 && strcmp(argv[1]," -pre")){
-    cout << "Starting data loading" << endl;
+    cout << "Starting data loading. This may take a while..." << endl;
   // Worker responsible of preprocessing
     PreProcessData();
   }
