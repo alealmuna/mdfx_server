@@ -215,10 +215,12 @@ string get_filename( vector <Quote> &quotes_v ){
    * Check if the instrument belogs to the 
    * provided list.
    */
-bool nemo_in(vector <int> nemo_vct, int value){
-  for (int i = 0; i < nemo_vct.size();i++){
-    if (nemo_vct[i] == value)
+
+bool nemo_in(/*vector <int>*/int * nemo_vct, int value){
+  for (int i = 0; i < /*nemo_vct.size()*/ 3 ;i++){
+    if (nemo_vct[i] == value){
       return true;
+    }
   }
   return false;
 }
@@ -275,8 +277,7 @@ bool is_candidate(Quote &quote, Fxrequest request,
   if ((first_doc and qu_over) or
      (last_doc and qu_under) or
      (qu_between)){
-//  return nemo_in(request.nemo,quotes[j].nemo);
-    return true;
+    return nemo_in(request.nemo,quote.nemo);
   };
   return false;
 }
