@@ -217,9 +217,9 @@ string get_filename( vector <Quote> &quotes_v ){
    * Check if the instrument belogs to the 
    * provided list.
    */
-bool nemo_in(int * nemo_lst, int value){
-  for (int i = 0; i < 4;i++){
-    if (nemo_lst[i] == value)
+bool nemo_in(vector <int> nemo_vct, int value){
+  for (int i = 0; i < nemo_vct.size();i++){
+    if (nemo_vct[i] == value)
       return true;
   }
   return false;
@@ -267,13 +267,25 @@ bool is_candidate(Quote &quote, Fxrequest request,
 
   first_doc = (current == bgn_indx);
   last_doc = ( current == end_indx);
-  qu_over = (quote.tstamp >= request.begin_ts);
-  qu_under = (quote.tstamp <= request.end_ts );
+  /* request timestamp evaluated in miliseconds */
+  qu_over = (quote.tstamp >= request.begin_ts*1000);
+  qu_under = (quote.tstamp <= request.end_ts*1000 );
   qu_between = ( current > bgn_indx and current < end_indx );
+
+  cout.precision(20);
+  cout << "Comparing: " << quote.tstamp << " ";
+  cout << " vs " << request.begin_ts << endl;
+  cout << "Flags: " << endl;
+  cout << "First Doc: " << first_doc << endl;
+  cout << "Quote Over: " << qu_over << endl;
+  cout << "Last Doc: " << last_doc << endl;
+  cout << "Quote Under: " << qu_under << endl;
+  cout << "Quote Middle: " << qu_between << endl << endl;
 
   if ((first_doc and qu_over) or
      (last_doc and qu_under) or
      (qu_between)){
+//  return nemo_in(request.nemo,quotes[j].nemo);
     return true;
   };
   return false;
@@ -331,7 +343,6 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
 
       for( int j = 0; j < data_size; j++){
         if (is_candidate(quotes[j], request, bgn_indx, end_indx, i)){
-//             nemo_in(request.nemo,quotes[j].nemo)){
 //             is_valid_q(quotes[j],request.max_rel_spread)){
                   result.push_back(quotes[j]);
         };
