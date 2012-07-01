@@ -42,14 +42,16 @@ int writeToH5perDay(vector <Quote> &quotes_v){
   double quote_date;
   int status = 0;
   vector <Quote> dailyq;
-
+  cout << "Write per day" << endl;
   last_date = dayFromEpoch(quotes_v[0].tstamp);
   while(0<quotes_v.size()) {
     quote_date = dayFromEpoch(quotes_v[0].tstamp);
+    cout.precision(30);
     if (quote_date == last_date){
       /* last quote insert the remain vector */
       dailyq.push_back(quotes_v[0]);
       if (quotes_v.size()==1){
+        cout << get_filename(dailyq) << endl;
         status =  writeToH5(dailyq ,get_filename(dailyq));
         dailyq.clear();
       }
@@ -78,7 +80,7 @@ int writeToH5(vector <Quote> &quotes_v, string filename) {
      * Create the file.
      */
     H5File* file = new H5File(FILENAME, H5F_ACC_TRUNC);
-
+    
     /*
      * Create the memory datatype.
      */
@@ -199,15 +201,13 @@ string get_filename( vector <Quote> &quotes_v ){
     double mtimestamp;
     char   buf[40];
     time_t rawtime;
-    string datapath = "/data/";
-//    string datapath = "/home/oscar/src/mdfx_server/data/";
+    string datapath = "data/";
 
     Quote* quotes =  &quotes_v[0];
     mtimestamp = quotes[0].tstamp;
     mtimestamp =  mtimestamp/(SID*1000);
     sprintf(buf,"%d.h5",(int) mtimestamp);
     datapath += buf;
-//    return buf;
     return datapath;
 }
 
@@ -215,9 +215,9 @@ string get_filename( vector <Quote> &quotes_v ){
    * Check if the instrument belogs to the 
    * provided list.
    */
-bool nemo_in(int * nemo_lst, int value){
-  for (int i = 0; i < 4;i++){
-    if (nemo_lst[i] == value)
+bool nemo_in(vector <int> nemo_vct, int value){
+  for (int i = 0; i < nemo_vct.size();i++){
+    if (nemo_vct[i] == value)
       return true;
   }
   return false;
@@ -228,7 +228,7 @@ bool nemo_in(int * nemo_lst, int value){
 string format_filename(int index){
     char buf[40];
 //    string datapath = "/home/oscar/src/mdfx_server/data/";
-    string datapath = "/data/";
+    string datapath = "data/";
     sprintf(buf,"%d.h5", index);
     datapath += buf;
     return datapath;
@@ -241,20 +241,46 @@ string format_filename(int index){
 
 bool is_valid_q(Quote &quote, double mrs){
   bool mrs_flag = quote.askp/quote.bidp >= exp(1 + mrs);
-  cout <<"flag:"<< mrs_flag << " " << quote.bidp << endl;
-  cout <<"data: " << quote.bidp << " " << quote.askp;
-  cout <<"price logic: "<< (quote.bidp > quote.askp) << endl;
-  cout <<"bidp and askp: "<< ((quote.bidp <= 0) or (quote.askp <= 0)) << endl;
-  cout <<"bids adn asks: "<<((quote.bids <= 0) or (quote.asks <= 0)) << endl;
   if ((quote.bidp <= 0) or (quote.askp <= 0) or
      (quote.bids <= 0) or (quote.asks <= 0) or
      (quote.bidp > quote.askp) or mrs_flag)
-      cout << "FALSE!" << endl;
       return false;
-  cout << "valid";
   return true;
 }
 
+  /*
+   * Evaluates if a quote is valid according to
+   * the date range required.
+   */
+
+bool is_candidate(Quote &quote, Fxrequest request,
+                  long int bgn_indx, long int end_indx,
+                  int current){
+
+  bool first_doc;
+  bool last_doc;
+  bool qu_over;
+  bool qu_under;
+  bool qu_between;
+
+  first_doc = (current == bgn_indx);
+  last_doc = ( current == end_indx);
+  /* request timestamp evaluated in miliseconds */
+  qu_over = (quote.tstamp >= request.begin_ts*1000);
+  qu_under = (quote.tstamp <= request.end_ts*1000 );
+  qu_between = ( current > bgn_indx and current < end_indx );
+
+  cout.precision(20);
+
+  if ((first_doc and qu_over) or
+     (last_doc and qu_under) or
+     (qu_between)){
+//  return nemo_in(request.nemo,quotes[j].nemo);
+    return true;
+  };
+  return false;
+}
+  
   /*
    * Extract from hdf5 the sorted data. Also apply a filter
    * and populates a vector of quotes.
@@ -262,15 +288,18 @@ bool is_valid_q(Quote &quote, double mrs){
 
 void ProcessResponse( Fxrequest request, vector <Quote> &result){
 
-  long int begin_index;
-  long int end_index;
+  long int bgn_indx;
+  long int end_indx;
 
   /* index is set accordin to the number of days from epoch.*/
 
   cout << "Procesing Response..." << endl << endl;
 
-  begin_index =  request.begin_ts/(SID*1000);
-  end_index = request.end_ts/(SID*1000);
+  bgn_indx =  request.begin_ts/(SID);
+  end_indx = request.end_ts/(SID);
+
+  cout << "Begin Index:" << bgn_indx << endl;
+  cout << "End Index: " << end_indx << endl;
 
   Exception::dontPrint();
 
@@ -287,7 +316,7 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
   DataSpace* dataspace;
   hsize_t dims_out[1];
 
-  for (int i = begin_index; i <= end_index; i++){
+  for (int i = bgn_indx; i <= end_indx; i++){
     try{
       H5std_string FILE_NAME(format_filename(i));
       H5File* file = new H5File(FILE_NAME,
@@ -301,16 +330,13 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
 
       Quote quotes[data_size];
       dataset->read( quotes, mtype1 );
-      cout.precision(20);
+
       for( int j = 0; j < data_size; j++){
-//        if  ((((i == begin_index) and (quotes[j].tstamp >= request.begin_ts)) or
-//            ((i == end_index)   and (quotes[j].tstamp <= request.end_ts )) or
-//            ( i> begin_index and i < end_index )) and 
-//             nemo_in(request.nemo,quotes[j].nemo)){
+        if (is_candidate(quotes[j], request, bgn_indx, end_indx, i)){
 //             is_valid_q(quotes[j],request.max_rel_spread)){
-             result.push_back(quotes[j]);
-//             };
-      }
+                  result.push_back(quotes[j]);
+        };
+      };
       delete dataset;
       delete file;
     }catch( FileIException error ){
@@ -318,3 +344,4 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
   }
   cout << "Dispatch!" << endl << endl;
 }
+

@@ -15,6 +15,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/lexical_cast.hpp>
 
 using std::cout;
 using std::endl;
@@ -32,6 +33,8 @@ using boost::bimap;
 using boost::tokenizer;
 using boost::regex;
 using boost::escaped_list_separator;
+using boost::char_separator;
+using boost::lexical_cast;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 using namespace boost::filesystem;
@@ -99,28 +102,51 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
     split(nemov,nemov.at(0),is_any_of("/")); 
     ifstream in(data.c_str());
     if (!in.is_open()) cout << "file error" << endl;
-    typedef tokenizer< escaped_list_separator<char> > Tokenizer;
-    string line;
-    while (getline(in,line)) {
-      Tokenizer tok(line);
-      vec.assign(tok.begin(),tok.end());
-      vec.at(0) = fixdate(vec.at(0), vec.at(1));
-      quote.tstamp = totstamp(vec.at(0), vec.at(1));
-      istringstream bidpf(vec.at(2));
-      istringstream bidsf(vec.at(3));
-      istringstream askpf(vec.at(4));
-      istringstream asksf(vec.at(5));
-      bidpf >> quote.bidp;
-      bidsf >> quote.bids;
-      askpf >> quote.askp;
-      asksf >> quote.asks;
-      bimap<string, int>::left_const_iterator nemo_iterator;
-      nemo_iterator = nemo_map.left.find(nemov.back());
-      quote.nemo = nemo_iterator->second;
-      if(quote.bidp>0.0 && quote.bids>0 && quote.askp>0.0 && quote.asks>0 && quote.askp>=quote.bidp)
-        quotes.push_back(quote);
-    }    
-    y++;  
+    int itertok;
+    char *line;
+    char *tokens;
+    float tmp;
+    string tokenstr;
+    string linestr;
+    string dates;
+    string temp;
+    line = new char[4096];
+    tokens = new char[410];
+    while(!in.eof()){
+      in.read(line,4096);
+      line = strtok(line, "\n");
+      while(line!=NULL){
+        linestr = line;
+        typedef tokenizer < char_separator <char> > tokenizer;
+        char_separator<char> sep(",");
+        tokenizer tokens(linestr, sep);
+        itertok = 0;
+        for (tokenizer::iterator tok_iter = tokens.begin();tok_iter != tokens.end(); ++tok_iter){
+          if(itertok==0)
+            dates = *tok_iter;
+          else if(itertok==1){
+            dates = fixdate(dates, *tok_iter);
+            quote.tstamp = totstamp(dates, *tok_iter);
+          }
+          else if(itertok==2)
+            quote.bidp = lexical_cast<float>(*tok_iter);
+          else if(itertok==3)
+	    quote.bids = lexical_cast<float>(*tok_iter);
+          else if (itertok==4)
+            quote.askp = lexical_cast<float>(*tok_iter);
+          else if(itertok==5)
+            quote.asks = lexical_cast<float>(*tok_iter);
+          itertok++;    
+        }
+	bimap<string, int>::left_const_iterator nemo_iterator;
+      	nemo_iterator = nemo_map.left.find(nemov.back());
+        quote.nemo = nemo_iterator->second;
+        if(quote.bidp>0.0 && quote.bids>0.0 && quote.askp>0.0 && quote.asks>0.0 && quote.askp>=quote.bidp)
+          quotes.push_back(quote);
+        line = strtok(NULL, "\n");
+        }
+    }
+    y++;
   }
   return quotes;
 }
