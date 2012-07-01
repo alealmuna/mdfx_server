@@ -22,6 +22,6 @@ int writeToH5(std::vector <Quote> &, std::string);
 int writeToH5perDay(std::vector <Quote> &);
 int readFromH5(std::vector <Quote> &);
 void ProcessResponse(Fxrequest, std::vector <Quote> &);
-string get_filename( std::vector <Quote> &);
-string format_filename(double index);
+std::string get_filename( std::vector <Quote> &);
+std::string format_filename(double index);
 #endif  // INCLUDE_HDF5_HANDLER_H_
