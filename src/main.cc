@@ -3,6 +3,7 @@
 #include <zmq.hpp>
 #include <google/protobuf/stubs/common.h>
 #include <iostream>
+#include <string>
 
 #include "include/worker.h"
 
@@ -23,14 +24,24 @@ static void s_catch_signals(void) {
   sigaction(SIGTERM, &action, NULL);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
   cout << "Amucan Market Data FX" << endl;
   s_catch_signals();
 
+  // More than 2 arguments
+  if (argc > 2) {
+    cout << "Wrong number of parameters" << endl;
+    cout << "usage: " << endl;
+    cout << "       " << "mdfx-server" << endl;
+    cout << "       " << "mdfx-server -pre" << endl;
+    return 0;
+  }
+  // Preprocess data
+  if (argc == 2 && strcmp(argv[1]," -pre")){
+    cout << "Starting data loading. This may take a while..." << endl;
   // Worker responsible of preprocessing
-  Worker initializer;
-  initializer.preprocessor();
-
+    PreProcessData();
+  }
   // Prepare our context and sockets
   zmq::context_t context(1);
   zmq::socket_t clients(context, ZMQ_ROUTER);
@@ -38,6 +49,7 @@ int main() {
   zmq::socket_t workers(context, ZMQ_DEALER);
   workers.bind("inproc://workers");
 
+  cout << "Waiting for requests" << endl;
   // Launch pool of worker threads
   for (int thread_nbr = 0; thread_nbr != 2; thread_nbr++) {
     pthread_t worker;

@@ -16,8 +16,12 @@ const H5std_string ASKP("ask_price");
 const H5std_string ASKS("ask_size");
 
 const int   RANK = 1;
+const long int SID = 86000;
 
-int writeToH5(std::vector <Quote> &);
+int writeToH5(std::vector <Quote> &, std::string);
+int writeToH5perDay(std::vector <Quote> &);
 int readFromH5(std::vector <Quote> &);
-int processResponse(Fxrequest, std::vector <Quote> &);
+void ProcessResponse(Fxrequest, std::vector <Quote> &);
+std::string get_filename( std::vector <Quote> &);
+std::string format_filename(double);
 #endif  // INCLUDE_HDF5_HANDLER_H_
