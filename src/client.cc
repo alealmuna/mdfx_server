@@ -10,8 +10,8 @@ using std::endl;
 #include "include/proto_handler.h"
 
 int main(int argc, char* argv[]) {
-  // More than 2 arguments
-  if ((argc != 2 && argc != 3) || (argc != 3 || strcmp(argv[1], "-proto"))){
+  // Wrong arguments case
+  if ((argc != 1) || (argc == 3 && !strcmp(argv[1], "-proto"))){
     cout << "Wrong parameters" << endl;
     cout << "usage: " << endl;
     cout << "       " << "mdfx_client" << endl;

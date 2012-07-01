@@ -27,7 +27,7 @@ void PreProcessData(void) {
   csvhandler.sortvec(quotes);
   cout << "Quotes sorted" << endl;
   string filename("processed_data.h5");
-  writeToH5(quotes, filename);
+  writeToH5perDay(quotes);
 }
 
 void* Worker::listener(void *arg) {
