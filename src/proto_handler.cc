@@ -44,7 +44,7 @@ void ProtoHandler::ProcessRequest(
       fxrequest.nemo[i] = nemo_iterator->second;
     }
 
-    //processResponse(fxrequest, quotes);
+    ProcessResponse(fxrequest, quotes);
 }
 
 bool ProtoHandler::ReadRequestFromFile(
