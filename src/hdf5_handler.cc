@@ -301,9 +301,6 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
 
   cout << "Begin Index:" << bgn_indx << endl;
   cout << "End Index: " << end_indx << endl;
-  cout << "Nemos: " << request.nemo[0] << " ";
-  cout << request.nemo[1] << " " << request.nemo[2] << " ";
-  cout << request.nemo[3] << " " << endl;
 
   Exception::dontPrint();
 
