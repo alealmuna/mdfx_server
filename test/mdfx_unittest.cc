@@ -58,17 +58,17 @@ TEST_F(CsvHandlerTest,Readcsv){
   files.push_back("test/dirtest/USDJPYbbotest.csv");
   testvec = chandler.readcsv(files);
   EXPECT_EQ((long long)1293987739870, (long long)testvec.at(0).tstamp);
-  EXPECT_EQ(1, testvec.at(0).nemo);
+  EXPECT_EQ(0, testvec.at(0).nemo);
   EXPECT_EQ((float)1.33182, (float)testvec.at(0).bidp);
   EXPECT_EQ(1500000, testvec.at(0).bids);
   EXPECT_EQ((float)12.4, (float)testvec.at(0).askp); 
   EXPECT_EQ(1, testvec.at(0).asks);   
-  EXPECT_EQ((long long)1293987739870, (long long)testvec.at(2).tstamp);
-  EXPECT_EQ(3, testvec.at(2).nemo);
-  EXPECT_EQ((float)1.33182, (float)testvec.at(2).bidp);
-  EXPECT_EQ(1500000, testvec.at(2).bids);
-  EXPECT_EQ((float)12.4, (float)testvec.at(2).askp); 
-  EXPECT_EQ(1, testvec.at(2).asks);   
+  EXPECT_EQ((long long)1293987739870, (long long)testvec.at(1).tstamp);
+  EXPECT_EQ(2, testvec.at(14).nemo);
+  EXPECT_EQ((float)1.33182, (float)testvec.at(14).bidp);
+  EXPECT_EQ(1500000, testvec.at(14).bids);
+  EXPECT_EQ((float)12.4, (float)testvec.at(14).askp); 
+  EXPECT_EQ(1, testvec.at(14).asks);  
 }
 
 TEST_F(CsvHandlerTest,Fixdate){
@@ -84,3 +84,8 @@ TEST_F(CsvHandlerTest,Tostamp){
   double tstampnew = chandler.totstamp(fdate,hrs);
   EXPECT_EQ((long)tstamporg, (long)tstampnew);
 }
+
+TEST_F(CsvHandlerTest,Sortvec) {
+  
+}
+

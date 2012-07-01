@@ -7,7 +7,7 @@
 #include <fstream>
 #include <algorithm>
 #include <iterator>
-#include <map>
+#include <boost/bimap.hpp>
 #include <boost/regex.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/algorithm/string.hpp>
@@ -15,6 +15,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/lexical_cast.hpp>
 
 using std::cout;
 using std::endl;
@@ -27,11 +28,13 @@ using boost::is_any_of;
 using std::transform;
 using std::back_inserter;
 using std::ifstream;
-using std::map;
 using std::sort;
+using boost::bimap;
 using boost::tokenizer;
 using boost::regex;
 using boost::escaped_list_separator;
+using boost::char_separator;
+using boost::lexical_cast;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 using namespace boost::filesystem;
@@ -57,12 +60,12 @@ vector<string> CsvHandler::readdir(string dir) {
         copy(directory_iterator(p), directory_iterator(), back_inserter(v));
         sort(v.begin(), v.end());
         for (vec::const_iterator it(v.begin()), it_end(v.end()); it != it_end; ++it) {
-	  regex exp("(USDJPY|EURUSD)");  //Symbols to find
-	  filename = (*it).string();
-	  if(regex_search(filename, exp))
-	    arch.push_back(filename);
+          regex exp(NEMO_REGEXP);  //Symbols to find
+          filename = (*it).string();
+          if(regex_search(filename, exp))
+            arch.push_back(filename);
         }
-	return arch; // csv directory ls
+        return arch; // csv directory ls
       }
       else
         cout << p << " exists, but is neither a regular file nor a directory" << endl;
@@ -86,12 +89,12 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
   vector < vector<string> > csv;
   vector <float> vec_float;
   vector<string>::const_iterator y = files.begin();
-  map<string, int> nemo_map;
 
   // map initialization
-  nemo_map["EURUSD"] = 1;
-  nemo_map["GBPUSD"] = 2;
-  nemo_map["USDJPY"] = 3;
+  bimap<string, int> nemo_map;
+  nemo_map.insert(bimap<string, int>::value_type("EURUSD", 0));
+  nemo_map.insert(bimap<string, int>::value_type("GBPUSD", 1));
+  nemo_map.insert(bimap<string, int>::value_type("USDJPY", 2));
 
   while(y!=files.end()) {  //files cycle
     string data(*y);
@@ -99,26 +102,51 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
     split(nemov,nemov.at(0),is_any_of("/")); 
     ifstream in(data.c_str());
     if (!in.is_open()) cout << "file error" << endl;
-    typedef tokenizer< escaped_list_separator<char> > Tokenizer;
-    string line;
-    while (getline(in,line)) {
-      Tokenizer tok(line);
-      vec.assign(tok.begin(),tok.end());
-      vec.at(0) = fixdate(vec.at(0), vec.at(1));
-      quote.tstamp = totstamp(vec.at(0), vec.at(1));
-      istringstream bidpf(vec.at(2));
-      istringstream bidsf(vec.at(3));
-      istringstream askpf(vec.at(4));
-      istringstream asksf(vec.at(5));
-      bidpf >> quote.bidp;
-      bidsf >> quote.bids;
-      askpf >> quote.askp;
-      asksf >> quote.asks;
-      quote.nemo = nemo_map[nemov.back()];
-      if(quote.bidp>0.0 && quote.bids>0 && quote.askp>0.0 && quote.asks>0 && quote.askp>=quote.bidp)
-        quotes.push_back(quote);
-    }    
-    y++;  
+    int itertok;
+    char *line;
+    char *tokens;
+    float tmp;
+    string tokenstr;
+    string linestr;
+    string dates;
+    string temp;
+    line = new char[4096];
+    tokens = new char[410];
+    while(!in.eof()){
+      in.read(line,4096);
+      line = strtok(line, "\n");
+      while(line!=NULL){
+        linestr = line;
+        typedef tokenizer < char_separator <char> > tokenizer;
+        char_separator<char> sep(",");
+        tokenizer tokens(linestr, sep);
+        itertok = 0;
+        for (tokenizer::iterator tok_iter = tokens.begin();tok_iter != tokens.end(); ++tok_iter){
+          if(itertok==0)
+            dates = *tok_iter;
+          else if(itertok==1){
+            dates = fixdate(dates, *tok_iter);
+            quote.tstamp = totstamp(dates, *tok_iter);
+          }
+          else if(itertok==2)
+            quote.bidp = lexical_cast<float>(*tok_iter);
+          else if(itertok==3)
+	    quote.bids = lexical_cast<float>(*tok_iter);
+          else if (itertok==4)
+            quote.askp = lexical_cast<float>(*tok_iter);
+          else if(itertok==5)
+            quote.asks = lexical_cast<float>(*tok_iter);
+          itertok++;    
+        }
+	bimap<string, int>::left_const_iterator nemo_iterator;
+      	nemo_iterator = nemo_map.left.find(nemov.back());
+        quote.nemo = nemo_iterator->second;
+        if(quote.bidp>0.0 && quote.bids>0.0 && quote.askp>0.0 && quote.asks>0.0 && quote.askp>=quote.bidp)
+          quotes.push_back(quote);
+        line = strtok(NULL, "\n");
+        }
+    }
+    y++;
   }
   return quotes;
 }
