@@ -277,7 +277,7 @@ bool is_candidate(Quote &quote, Fxrequest request,
   if ((first_doc and qu_over) or
      (last_doc and qu_under) or
      (qu_between)){
-    return nemo_in(request.nemo,quotes[j].nemo);
+    return nemo_in(request.nemo,quote.nemo);
   };
   return false;
 }
