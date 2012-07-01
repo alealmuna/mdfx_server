@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
   }
   else if ((argc == 2) && strcmp(argv[1], "--create-request")){
     string filename(argv[1]);
-    if(phandler.ReadRequestFromFile(filename, pb_request))return 0;
+    if(!phandler.ReadRequestFromFile(filename, pb_request))return 0;
   } 
   else  
     PromptForRequest(&pb_request);
