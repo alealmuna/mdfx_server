@@ -202,14 +202,12 @@ string get_filename( vector <Quote> &quotes_v ){
     char   buf[40];
     time_t rawtime;
     string datapath = "data/";
-//    string datapath = "/home/oscar/src/mdfx_server/data/";
 
     Quote* quotes =  &quotes_v[0];
     mtimestamp = quotes[0].tstamp;
     mtimestamp =  mtimestamp/(SID*1000);
     sprintf(buf,"%d.h5",(int) mtimestamp);
     datapath += buf;
-//    return buf;
     return datapath;
 }
 
@@ -273,14 +271,6 @@ bool is_candidate(Quote &quote, Fxrequest request,
   qu_between = ( current > bgn_indx and current < end_indx );
 
   cout.precision(20);
-  cout << "Comparing: " << quote.tstamp << " ";
-  cout << " vs " << request.begin_ts << endl;
-  cout << "Flags: " << endl;
-  cout << "First Doc: " << first_doc << endl;
-  cout << "Quote Over: " << qu_over << endl;
-  cout << "Last Doc: " << last_doc << endl;
-  cout << "Quote Under: " << qu_under << endl;
-  cout << "Quote Middle: " << qu_between << endl << endl;
 
   if ((first_doc and qu_over) or
      (last_doc and qu_under) or
