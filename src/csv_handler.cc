@@ -45,50 +45,74 @@ float strtofloat(string const& s) {
   return value;
 }
 
-void CsvHandler::decompress(char *dir){
-  char com[1000];
-  sprintf(com, "gzip -d %s",dir);
-  system(com); 
+void CsvHandler::decompress(string dir){
+  string comm = "cd data/raw && tar xfz ../compressed_data "+dir+" --strip=3"; 
+  cout << comm << endl; 
+  system(comm.c_str()); 
   return; 
 }
 
 vector<string> CsvHandler::readdir(string dir) {
-  string filename;
-  vector<string> arch;
+  string filen, pathc;
+  vector<string> archgz;
+  vector<string> archcsv;
   path p (dir);
   try {
     if (exists(p)) {
-      if (is_regular_file(p)){
-        cout << p << " size is " << file_size(p) << endl;
-        exit (1);
-      }
-      else if (is_directory(p)) {
-        typedef vector<path> vec;
-        vec v;
-        copy(directory_iterator(p), directory_iterator(), back_inserter(v));
-        sort(v.begin(), v.end());
-        for (vec::const_iterator it(v.begin()), it_end(v.end()); it != it_end; ++it) {
-          regex exp(NEMO_REGEXP);  //Symbols to find
-          filename = (*it).string();
-          if(regex_search(filename, exp))
-            arch.push_back(filename);
-        }
-        return arch; // csv directory ls
-      }
+      if (is_directory(p)) {
+        typedef vector<path> gz;
+        gz gzpath;
+        copy(directory_iterator(p), directory_iterator(), back_inserter(gzpath));
+        sort(gzpath.begin(), gzpath.end());
+        for (gz::const_iterator it(gzpath.begin()), it_end(gzpath.end()); it != it_end; ++it) {
+          regex data("tar.gz");
+          filen = (*it).string();
+          if(regex_search(filen, data)){
+              decompress(filen);
+            }          
+          }
+          pathc = dir;
+          path c (pathc);
+          try {
+            if(exists(c)) {
+              if (is_directory(c)){
+                typedef vector<path> csv;
+                csv csvpath;
+                copy(directory_iterator(c), directory_iterator(), back_inserter(csvpath));
+                sort(csvpath.begin(), csvpath.end());
+                vector<path>::iterator itercsv;                 
+                for(itercsv = csvpath.begin(); itercsv < csvpath.end(); itercsv++){
+                  regex exp(NEMO_REGEXP);
+                  filen = (*itercsv).string();
+                  if(regex_search(filen, exp))
+                    archcsv.push_back(filen);
+                }
+                if(archcsv.empty())
+                  exit (1);
+                return archcsv;
+              }
+            }
+            else{
+              cout << p << " does not exist" << endl;
+              exit (1);
+            }
+          } 
+          catch (const filesystem_error& ex) {
+            cout << ex.what() << endl;
+          }
+      }else{
+         cout << p << " exists, but is neither a regular file nor a directory" << endl;
+         exit (1);
+       }
+     }
       else{
-        cout << p << " exists, but is neither a regular file nor a directory" << endl;
-        exit (1);
+          cout << p << " does not exist" << endl;
+          exit (1);
+        }
       }
-    }
-    else{
-      cout << p << " does not exist" << endl;
-      exit (1);
-    }
-  }
-  catch (const filesystem_error& ex) {
-    cout << ex.what() << endl;
-  }
-  return arch;
+      catch (const filesystem_error& ex) {
+        cout << ex.what() << endl;
+      }
 }
 	
 vector <Quote> CsvHandler:: readcsv(vector<string> files) {

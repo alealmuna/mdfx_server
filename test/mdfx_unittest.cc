@@ -42,16 +42,16 @@ TEST_F(FXRequestTest,ReadProtobuf){
   google::protobuf::ShutdownProtobufLibrary();
 }
 */
-/*TEST_F(CsvHandlerTest, Decompress){
-  chandler.decompress("test/dirtest/hello.gz");  
-}*/
+TEST_F(CsvHandlerTest, Decompress){
+  //chandler.decompress("data/");  
+}
 
 TEST_F(CsvHandlerTest, ReadDirectory){
   vector <string> files;
   //files.push_back("csvtest.csv");
-  files.push_back("test/dirtest/EURUSDbbotest.csv");
+  files.push_back("data/raw/USDJPYbbotest.csv");
   for(int i=0;i<files.size();i++) {
-    EXPECT_EQ(files.at(i), chandler.readdir("test/dirtest").at(i));
+    EXPECT_EQ(files.at(i), chandler.readdir("data/").at(i));
   }
 }
 

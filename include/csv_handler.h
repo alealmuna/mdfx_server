@@ -6,7 +6,7 @@
 
 class CsvHandler {
   public:
-    void decompress(char *dir);
+    void decompress(std::string);
     std::vector <Quote> readcsv(std::vector<std::string> files);
     std::string fixdate(std::string date, std::string hrs);
     double totstamp(std::string date, std::string hrs);
