@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     return 0;
   }
   // Preprocess data
-  if (argc == 2 && strcmp(argv[1]," -pre")){
+  if (argc == 2 && !strcmp(argv[1]," --pre")){
     cout << "Starting data loading. This may take a while..." << endl;
   // Worker responsible of preprocessing
     PreProcessData();
