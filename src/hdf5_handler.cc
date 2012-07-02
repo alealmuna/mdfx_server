@@ -203,14 +203,13 @@ string get_filename( vector <Quote> &quotes_v ){
     double mtimestamp;
     char   buf[40];
     time_t rawtime;
-    string datapath = "data/";
+    string datapath = "data/processed/";
 
     Quote* quotes =  &quotes_v[0];
     mtimestamp = quotes[0].tstamp;
     mtimestamp =  mtimestamp/(SID*1000);
     sprintf(buf,"%d.h5",(int) mtimestamp);
-    datapath += buf;
-    return datapath;
+    return datapath + buf;
 }
 
   /*
@@ -230,12 +229,10 @@ bool nemo_in(/*vector <int>*/int * nemo_vct, int value){
    * Generates a file_path based on a double.
    */
 string format_filename(int index){
-    char buf[40];
-//    string datapath = "/home/oscar/src/mdfx_server/data/";
-    string datapath = "data/";
-    sprintf(buf,"%d.h5", index);
-    datapath += buf;
-    return datapath;
+  char buf[40];
+  string datapath = "data/processed";
+  sprintf(buf,"%d.h5", index);
+  return datapath + buf;
 }
 
   /*
@@ -395,8 +392,6 @@ int createIndex(vector <Quote> &quotes_v, string filename) {
         current_index.index = i;
         indexes.push_back(current_index);
         cout.precision(20);
-        cout <<  "Day : " << current_index.day << " Data: " << current_index.index 
-        << ", " << quotes[i].tstamp  <<  ", " << quotes[i].askp  << ", " << quotes[i].bidp <<endl;
       }
     }
     cout << "Writing to file: " << filename << endl;
