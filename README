@@ -21,9 +21,9 @@ DEPENDENCIES
 USAGE  
 
   Server:
-    make                            // Compile
-    ./bin/mdfx_server               // Run server
-    ./bin/mdfx_server --pre         // Preprocess data
+    make                                // Compile
+    ./bin/mdfx_server                   // Run server
+    ./bin/mdfx_server --pre             // Preprocess data
 
   Client:
     make client                         // Compile client

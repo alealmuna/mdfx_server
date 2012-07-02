@@ -42,6 +42,10 @@ TEST_F(FXRequestTest,ReadProtobuf){
   google::protobuf::ShutdownProtobufLibrary();
 }
 */
+/*TEST_F(CsvHandlerTest, Decompress){
+  chandler.decompress("test/dirtest/hello.gz");  
+}*/
+
 TEST_F(CsvHandlerTest, ReadDirectory){
   vector <string> files;
   //files.push_back("csvtest.csv");
@@ -55,9 +59,10 @@ TEST_F(CsvHandlerTest,Readcsv){
   vector <string> files;
   vector <Quote> testvec;
   //files.push_back("../staging/storrealba/cart_storrealba_20120615_095234010/EURUSDbbo_201101010000_201102282359.csv");
-  //files.push_back("../staging/storrealba/cart_storrealba_20120615_095234010/GBPJPYbbo_201101010000_201102282359.csv");
-  files.push_back("test/dirtest/EURUSDbbotest.csv");
-  files.push_back("test/dirtest/USDJPYbbotest.csv");
+  //files.push_back("../staging/storrealba/cart_storrealba_20120615_095234010/GBPUSDbbo_201101010000_201102282359.csv");
+  files.push_back("data/USDJPYbbo_201101010000_201102282359.csv");
+  //files.push_back("test/dirtest/EURUSDbbotest.csv");
+  //files.push_back("test/dirtest/USDJPYbbotest.csv");
   testvec = chandler.readcsv(files);
   EXPECT_EQ((long long)1293987739870, (long long)testvec.at(0).tstamp);
   EXPECT_EQ(0, testvec.at(0).nemo);

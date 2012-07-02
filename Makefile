@@ -22,7 +22,7 @@ test: $(TESTS)
 
 client: $(CLIENT)
 
-all : $(SERVER) $(TESTS) $(CLIENT)
+all : $(SERVER) $(CLIENT) $(TESTS) 
 
 clean :
 	rm -f $(TESTS) gtest.a gtest_main.a *.o $(INC_DIR)/*.gch 
