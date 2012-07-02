@@ -1,6 +1,4 @@
-  /***************************
-   *  Market Data FX server  *
-   ***************************/
+                      == MARKET DATA FX SERVER ==
 
 DESCRIPTION
 
@@ -12,24 +10,34 @@ messages.
 
 DEPENDENCIES
 
- libboost
- protobuf 
- zeromq
- hdf5
- libgoogle-perftools
+  - libboost
+    http://www.boost.org
+
+  - protobuf 
+    https://developers.google.com/protocol-buffers
+
+  - zeromq
+    http://www.zeromq.org
+
+  - hdf5
+    http://www.zeromq.org
+
+  - libgoogle-perftools
+    http://www.hdfgroup.org/HDF5
 
 USAGE  
 
-  Server:
-    make                                // Compile
-    ./bin/mdfx_server                   // Run server
-    ./bin/mdfx_server --pre             // Preprocess data
-
-  Client:
-    make client                         // Compile client
-    ./bin/mdfx_client                   // Send prompted request 
-    ./bin/mdfx_client <filename>        // Send protobuf request file
-    ./bin/mdfx_client --create-request  // Create protobuf request file
+ Server:
+      make                                // Compile server
+      ./bin/mdfx_server                   // Run server
+      ./bin/mdfx_server --pre             // Preprocess data assuming compressed
+                                          // files are on 'data/compressed' 
+                                          // folder
+ Client:
+      make client                         // Compile client
+      ./bin/mdfx_client                   // Send prompted request 
+      ./bin/mdfx_client <filename>        // Send protobuf request file
+      ./bin/mdfx_client --create-request  // Create protobuf request file
 
   Test:
-        make test
+       make test                          // Compile and run test
