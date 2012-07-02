@@ -46,17 +46,18 @@ float strtofloat(string const& s) {
 }
 
 void CsvHandler::decompress(string dir){
-  string comm = "cd data/raw && tar xfz ../compressed_data "+dir+" --strip=3"; 
+  string comm = "cd data/raw && tar xfz ../" + dir + " --strip=3"; 
   cout << comm << endl; 
   system(comm.c_str()); 
   return; 
 }
 
 vector<string> CsvHandler::readdir(string dir) {
-  string filen, pathc;
+  string filen, pathc, pathp;
   vector<string> archgz;
   vector<string> archcsv;
-  path p (dir);
+  pathp = dir+"/compressed";
+  path p (pathp);
   try {
     if (exists(p)) {
       if (is_directory(p)) {
@@ -67,11 +68,12 @@ vector<string> CsvHandler::readdir(string dir) {
         for (gz::const_iterator it(gzpath.begin()), it_end(gzpath.end()); it != it_end; ++it) {
           regex data("tar.gz");
           filen = (*it).string();
+          cout << filen << endl;
           if(regex_search(filen, data)){
               decompress(filen);
             }          
           }
-          pathc = dir;
+          pathc = dir+"/raw";;
           path c (pathc);
           try {
             if(exists(c)) {
@@ -84,6 +86,7 @@ vector<string> CsvHandler::readdir(string dir) {
                 for(itercsv = csvpath.begin(); itercsv < csvpath.end(); itercsv++){
                   regex exp(NEMO_REGEXP);
                   filen = (*itercsv).string();
+                  cout << filen << endl;
                   if(regex_search(filen, exp))
                     archcsv.push_back(filen);
                 }

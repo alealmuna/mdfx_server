@@ -51,7 +51,7 @@ TEST_F(CsvHandlerTest, ReadDirectory){
   //files.push_back("csvtest.csv");
   files.push_back("data/raw/USDJPYbbotest.csv");
   for(int i=0;i<files.size();i++) {
-    EXPECT_EQ(files.at(i), chandler.readdir("data/").at(i));
+    EXPECT_EQ(files.at(i), chandler.readdir("data").at(i));
   }
 }
 
