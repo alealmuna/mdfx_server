@@ -312,13 +312,12 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
   mtype1.insertMember( ASKP, HOFFSET(Quote, askp), PredType::NATIVE_FLOAT);
   mtype1.insertMember( ASKS, HOFFSET(Quote, asks), PredType::NATIVE_FLOAT);
 
-
-  DataSet* dataset;
-  DataSpace* dataspace;
   hsize_t dims_out[1];
 
   for (int i = bgn_indx; i <= end_indx; i++){
     try{
+      DataSet* dataset;
+      DataSpace* dataspace;
       H5std_string FILE_NAME(format_filename(i));
       H5File* file = new H5File(FILE_NAME,
                                 H5F_ACC_RDONLY );
@@ -329,8 +328,10 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
       int ndims = dataspace->getSimpleExtentDims( dims_out, NULL);
       int data_size = dims_out[0];
 
-      Quote quotes[data_size];
+      Quote *quotes;
+      quotes = new Quote[data_size];
       dataset->read( quotes, mtype1 );
+      cout << quotes[0].tstamp << endl;
       for( int j = 0; j < data_size; j++){
         if (is_candidate(quotes[j], request, bgn_indx, end_indx, i) and 
             is_valid_q(quotes[j], request.max_rel_spread)){
