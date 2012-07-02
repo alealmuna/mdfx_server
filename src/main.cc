@@ -33,11 +33,11 @@ int main(int argc, char* argv[]) {
     cout << "Wrong number of parameters" << endl;
     cout << "usage: " << endl;
     cout << "       " << "mdfx-server" << endl;
-    cout << "       " << "mdfx-server -pre" << endl;
+    cout << "       " << "mdfx-server --pre" << endl;
     return 0;
   }
   // Preprocess data
-  if (argc == 2 && !strcmp(argv[1]," --pre")){
+  if (argc == 2 && !strcmp(argv[1], "--pre")){
     cout << "Starting data loading. This may take a while..." << endl;
   // Worker responsible of preprocessing
     PreProcessData();

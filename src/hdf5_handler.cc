@@ -230,7 +230,7 @@ bool nemo_in(/*vector <int>*/int * nemo_vct, int value){
    */
 string format_filename(int index){
   char buf[40];
-  string datapath = "data/processed";
+  string datapath = "data/processed/";
   sprintf(buf,"%d.h5", index);
   return datapath + buf;
 }
