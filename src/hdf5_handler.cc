@@ -65,26 +65,6 @@ int writeToH5perDay(vector <Quote> &quotes_v){
   writeToH5(dailyq ,get_filename(dailyq));
   dailyq.clear();
 
-//  while(0<quotes_v.size()) {
-//    cout.precision(20);
-//    quote_date = dayFromEpoch(quotes_v[0].tstamp);
-//    cout.precision(30);
-//    if (quote_date == last_date){
-//      /* last quote insert the remain vector */
-//      dailyq.push_back(quotes_v[0]);
-//      if (quotes_v.size()==1){
-//        cout << get_filename(dailyq) << endl;
-//        status =  writeToH5(dailyq ,get_filename(dailyq));
-//        dailyq.clear();
-//      }
-//    }else{
-//      status = writeToH5(dailyq ,get_filename(dailyq));
-//      last_date = quote_date;
-//      dailyq.clear();
-//      dailyq.push_back(quotes_v[0]);
-//    };
-//    quotes_v.erase(quotes_v.begin());
-//  };
 }
 
 int writeToH5(vector <Quote> &quotes_v, string filename) {
@@ -174,7 +154,7 @@ int readFromH5(vector <Quote> &result) {
     DataSet* dataset;
     DataSpace* dataspace;
     hsize_t dims_out[1];
-    cout << "Loading query data from files" << endl;
+    printf( "Loading query data from files\n" );
     dataset = new DataSet(file->openDataSet(DATASET_NAME));
     dataspace = new DataSpace(dataset->getSpace());
 
@@ -184,11 +164,11 @@ int readFromH5(vector <Quote> &result) {
     Quote *quotes;
     quotes = new Quote[data_size];
     dataset->read(quotes, mtype1);
-    cout << "Fetching Quotes" << endl;
+    printf("Fetching Quotes\n");
     for (int i = 0; i < data_size; i++) {
        result.push_back(quotes[i]);
     }
-    cout << "Cleaning objects" << endl;
+    printf("Cleaning objects\n");
     delete dataset;
     delete file;
   }
@@ -265,9 +245,7 @@ string format_filename(int index){
 
 bool is_valid_q(Quote &quote, double mrs){
   bool mrs_flag = quote.askp/quote.bidp >= exp(1 + mrs);
-  if ((quote.bidp <= 0) or (quote.askp <= 0) or
-     (quote.bids <= 0) or (quote.asks <= 0) or
-     (quote.bidp > quote.askp) or mrs_flag)
+  if ((quote.bidp > quote.askp) or mrs_flag)
       return false;
   return true;
 }
@@ -316,13 +294,13 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
 
   /* index is set accordin to the number of days from epoch.*/
 
-  cout << "Procesing Response..." << endl << endl;
+  printf( "Procesing Response...\n\n");
 
   bgn_indx =  request.begin_ts/(SID);
   end_indx = request.end_ts/(SID);
 
-  cout << "Begin Index:" << bgn_indx << endl;
-  cout << "End Index: " << end_indx << endl;
+  printf( "Begin Index: %li\n", bgn_indx);
+  printf( "End Index: %li\n",end_indx);
 
   Exception::dontPrint();
 
@@ -334,13 +312,12 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
   mtype1.insertMember( ASKP, HOFFSET(Quote, askp), PredType::NATIVE_FLOAT);
   mtype1.insertMember( ASKS, HOFFSET(Quote, asks), PredType::NATIVE_FLOAT);
 
-
-  DataSet* dataset;
-  DataSpace* dataspace;
   hsize_t dims_out[1];
 
   for (int i = bgn_indx; i <= end_indx; i++){
     try{
+      DataSet* dataset;
+      DataSpace* dataspace;
       H5std_string FILE_NAME(format_filename(i));
       H5File* file = new H5File(FILE_NAME,
                                 H5F_ACC_RDONLY );
@@ -351,13 +328,14 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
       int ndims = dataspace->getSimpleExtentDims( dims_out, NULL);
       int data_size = dims_out[0];
 
-      Quote quotes[data_size];
+      Quote *quotes;
+      quotes = new Quote[data_size];
       dataset->read( quotes, mtype1 );
-
+      cout << quotes[0].tstamp << endl;
       for( int j = 0; j < data_size; j++){
-        if (is_candidate(quotes[j], request, bgn_indx, end_indx, i)){
-//             is_valid_q(quotes[j],request.max_rel_spread)){
-                  result.push_back(quotes[j]);
+        if (is_candidate(quotes[j], request, bgn_indx, end_indx, i) and 
+            is_valid_q(quotes[j], request.max_rel_spread)){
+          result.push_back(quotes[j]);
         };
       };
       delete dataset;
@@ -365,7 +343,7 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
     }catch( FileIException error ){
     }
   }
-  cout << "Dispatch!" << endl << endl;
+  printf( "Dispatch!\n\n");
 }
 
 int createIndex(vector <Quote> &quotes_v, string filename) {
