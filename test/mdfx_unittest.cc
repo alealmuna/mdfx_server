@@ -42,8 +42,8 @@ TEST_F(FXRequestTest,ReadProtobuf){
   google::protobuf::ShutdownProtobufLibrary();
 }
 */
-TEST_F(CsvHandlerTest, Decompress){
-  //chandler.decompress("data/");  
+/*TEST_F(CsvHandlerTest, Decompress){
+  chandler.decompress("data/");  
 }
 
 TEST_F(CsvHandlerTest, ReadDirectory){
@@ -52,8 +52,8 @@ TEST_F(CsvHandlerTest, ReadDirectory){
   files.push_back("data/raw/USDJPYbbotest.csv");
   for(int i=0;i<files.size();i++) {
     EXPECT_EQ(files.at(i), chandler.readdir("data").at(i));
-  }
-}
+  } 
+}*/
 
 TEST_F(CsvHandlerTest,Readcsv){
   vector <string> files;
