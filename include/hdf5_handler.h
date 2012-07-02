@@ -14,11 +14,14 @@ const H5std_string BIDP("bid_price");
 const H5std_string BIDS("bid_size");
 const H5std_string ASKP("ask_price");
 const H5std_string ASKS("ask_size");
+const H5std_string DAY("day");
+const H5std_string INDEX("index");
 
 const int   RANK = 1;
-const long int SID = 86000;
+const long int SID = 86400;
 
 int writeToH5(std::vector <Quote> &, std::string);
+int createIndex(std::vector <Quote> &, std::string);
 int writeToH5perDay(std::vector <Quote> &);
 int readFromH5(std::vector <Quote> &);
 void ProcessResponse(Fxrequest, std::vector <Quote> &);

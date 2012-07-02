@@ -38,31 +38,53 @@ double dayFromEpoch(double tstamp){
    */
 
 int writeToH5perDay(vector <Quote> &quotes_v){
-  double last_date;
-  double quote_date;
-  int status = 0;
-  vector <Quote> dailyq;
+  int last_date;
+  int quote_date;
+  int status;
   cout << "Write per day" << endl;
+  vector <Quote> dailyq;
+  vector <Quote>::iterator begin_it;
+  vector <Quote>::iterator end_it;
+  begin_it = quotes_v.begin();
+  end_it = quotes_v.begin();
   last_date = dayFromEpoch(quotes_v[0].tstamp);
-  while(0<quotes_v.size()) {
-    quote_date = dayFromEpoch(quotes_v[0].tstamp);
-    cout.precision(30);
-    if (quote_date == last_date){
-      /* last quote insert the remain vector */
-      dailyq.push_back(quotes_v[0]);
-      if (quotes_v.size()==1){
-        cout << get_filename(dailyq) << endl;
-        status =  writeToH5(dailyq ,get_filename(dailyq));
-        dailyq.clear();
-      }
-    }else{
-      status = writeToH5(dailyq ,get_filename(dailyq));
-      last_date = quote_date;
+ 
+  for(int i = 0; i < quotes_v.size(); i++){
+    quote_date = dayFromEpoch(quotes_v[i].tstamp);
+    if (quote_date != last_date){
+      dailyq.assign(begin_it, end_it);
+      writeToH5(dailyq ,get_filename(dailyq));
       dailyq.clear();
-      dailyq.push_back(quotes_v[0]);
-    };
-    quotes_v.erase(quotes_v.begin());
-  };
+      begin_it = end_it + 1;
+      last_date = quote_date;
+    }
+    end_it ++;
+  }
+  // Border case
+  dailyq.assign(begin_it, end_it);
+  writeToH5(dailyq ,get_filename(dailyq));
+  dailyq.clear();
+
+//  while(0<quotes_v.size()) {
+//    cout.precision(20);
+//    quote_date = dayFromEpoch(quotes_v[0].tstamp);
+//    cout.precision(30);
+//    if (quote_date == last_date){
+//      /* last quote insert the remain vector */
+//      dailyq.push_back(quotes_v[0]);
+//      if (quotes_v.size()==1){
+//        cout << get_filename(dailyq) << endl;
+//        status =  writeToH5(dailyq ,get_filename(dailyq));
+//        dailyq.clear();
+//      }
+//    }else{
+//      status = writeToH5(dailyq ,get_filename(dailyq));
+//      last_date = quote_date;
+//      dailyq.clear();
+//      dailyq.push_back(quotes_v[0]);
+//    };
+//    quotes_v.erase(quotes_v.begin());
+//  };
 }
 
 int writeToH5(vector <Quote> &quotes_v, string filename) {
@@ -71,6 +93,7 @@ int writeToH5(vector <Quote> &quotes_v, string filename) {
     Quote* quotes = &quotes_v[0];
     Exception::dontPrint();
     H5std_string FILENAME(filename);
+    cout << "Writing to file: " << filename << endl;
     /*
      * Create the data space.
      */
@@ -102,7 +125,6 @@ int writeToH5(vector <Quote> &quotes_v, string filename) {
      * Write data to the dataset;
      */
     dataset->write(quotes, mtype1);
-
     /*
      * Release resources
      */
@@ -344,5 +366,93 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
     }
   }
   cout << "Dispatch!" << endl << endl;
+}
+
+int createIndex(vector <Quote> &quotes_v, string filename) {
+  try {
+    int length = quotes_v.size();
+    Quote* quotes = &quotes_v[0];
+    Exception::dontPrint();
+    H5std_string FILENAME(filename);
+    cout << "Indexing... " << filename << endl;
+    /*
+     * Create the data space.
+     */
+    hsize_t dim[] = {length};   /* Dataspace dimensions */
+    DataSpace space(RANK, dim);
+    /*
+     * Create the file.
+     */
+    H5File* file = new H5File(FILENAME, H5F_ACC_TRUNC);
+    
+    /*
+     * Create the memory datatype.
+     */
+    CompType mtype1(sizeof(DataIndex));
+    mtype1.insertMember(DAY, HOFFSET(DataIndex, day), PredType::NATIVE_FLOAT);
+    mtype1.insertMember(INDEX, HOFFSET(DataIndex, index), PredType::NATIVE_INT);
+
+    /*
+     * Create the dataset.
+     */
+    DataSet* dataset;
+    dataset = new DataSet(file->createDataSet(DATASET_NAME, mtype1, space));
+
+    /*
+     * Write index to the dataset;
+     */
+
+    vector <DataIndex> indexes;
+    DataIndex current_index;
+
+    int last_day = dayFromEpoch(quotes[0].tstamp);
+    current_index.day = last_day;
+    current_index.index = 0;
+    indexes.push_back(current_index);
+
+    for(int i = 1; i < quotes_v.size(); i++){
+      current_index.day = dayFromEpoch(quotes[i].tstamp);
+      if (current_index.day > last_day){
+        last_day = current_index.day;
+        current_index.index = i;
+        indexes.push_back(current_index);
+        cout.precision(20);
+        cout <<  "Day : " << current_index.day << " Data: " << current_index.index 
+        << ", " << quotes[i].tstamp  <<  ", " << quotes[i].askp  << ", " << quotes[i].bidp <<endl;
+      }
+    }
+    cout << "Writing to file: " << filename << endl;
+    dataset->write(&indexes, mtype1);
+    /*
+     * Release resources
+     */
+    indexes.clear();
+    delete dataset;
+    delete file;
+  }  // end of try block
+
+  // catch failure caused by the H5File operations
+  catch(FileIException error) {
+    error.printError();
+    return -1;
+  }
+
+  // catch failure caused by the DataSet operations
+  catch(DataSetIException error) {
+    error.printError();
+    return -1;
+  }
+
+  // catch failure caused by the DataSpace operations
+  catch(DataSpaceIException error) {
+    error.printError();
+    return -1;
+  }
+
+  // catch failure caused by the DataSpace operations
+  catch(DataTypeIException error) {
+    error.printError();
+    return -1;
+  }
 }
 
