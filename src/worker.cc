@@ -52,6 +52,10 @@ void* Worker::listener(void *arg) {
     zmq::message_t request;
     mdfx_server::FXRequest pb_request;
 
+    // create a response
+    mdfx_server::BBOFXQuote pb_response;
+    std::string pb_serialized;
+
     // receive the request
     try {
       socket.recv(&request);
@@ -60,59 +64,71 @@ void* Worker::listener(void *arg) {
       break;
     }
 
+    std::cout << "server: Received " << pb_request.begin_timestamp() <<
+      " : " << pb_request.end_timestamp() << std::endl;
+
     // process the request
     phandler.ProcessRequest(request, pb_request, quotes);
     last_quote = quotes.size() - 1;  // we need the index in the vector
     cout << "Number of quotes to send :" << quotes.size() <<endl;;
-    std::cout << "server: Received " << pb_request.begin_timestamp() <<
-      ": " << pb_request.end_timestamp() << std::endl;
 
-    // create a response
-    mdfx_server::BBOFXQuote pb_response;
-    std::string pb_serialized;
-
-    // create the reply as a multipart message, transforming each vector's
-    // element into a protobuf object
-    for (size_t i = 0; i < last_quote; ++i) {
-      pb_response.set_timestamp(quotes[i].tstamp);
-      // mapping nemo
-      bimap<string, int>::right_const_iterator nemo_iterator;
-      nemo_iterator = nemo_map.right.find(quotes[i].nemo);
-      pb_response.set_symbol_nemo(nemo_iterator->second);
-      pb_response.set_bid_price(quotes[i].bidp);
-      pb_response.set_bid_size(quotes[i].bids);
-      pb_response.set_ask_price(quotes[i].askp);
-      pb_response.set_ask_size(quotes[i].asks);
+    if (quotes.size() == 0) {
+      // if nothing is found, a null message is sent
+      pb_response.set_timestamp(-1);
       pb_response.SerializeToString(&pb_serialized);
       zmq::message_t reply(pb_serialized.size());
       memcpy(reinterpret_cast<void *>(reply.data()), pb_serialized.c_str(),
           pb_serialized.size());
       try {
-        socket.send(reply, ZMQ_SNDMORE);
+        socket.send(reply);  // null message sent
       } catch(zmq::error_t&) {
         cout << zmq_strerror(errno) << endl;
         break;
       }
-    }
-    // send the final part
-    // mapping nemo
-    bimap<string, int>::right_const_iterator nemo_iterator;
-    nemo_iterator = nemo_map.right.find(quotes[last_quote].nemo);
-    pb_response.set_symbol_nemo(nemo_iterator->second);
-    pb_response.set_timestamp(quotes[last_quote].tstamp);
-    pb_response.set_bid_price(quotes[last_quote].bidp);
-    pb_response.set_bid_size(quotes[last_quote].bids);
-    pb_response.set_ask_price(quotes[last_quote].askp);
-    pb_response.set_ask_size(quotes[last_quote].asks);
-    pb_response.SerializeToString(&pb_serialized);
-    zmq::message_t reply(pb_serialized.size());
-    memcpy(reinterpret_cast<void *>(reply.data()), pb_serialized.c_str(),
-        pb_serialized.size());
-    try {
-      socket.send(reply);
-    } catch(zmq::error_t&) {
-      cout << zmq_strerror(errno) << endl;
-      break;
+    } else {
+      // create the reply as a multipart message, transforming each vector's
+      // element into a protobuf object
+      for (size_t i = 0; i < last_quote; ++i) {
+        pb_response.set_timestamp(quotes[i].tstamp);
+        // mapping nemo
+        bimap<string, int>::right_const_iterator nemo_iterator;
+        nemo_iterator = nemo_map.right.find(quotes[i].nemo);
+        pb_response.set_symbol_nemo(nemo_iterator->second);
+        pb_response.set_bid_price(quotes[i].bidp);
+        pb_response.set_bid_size(quotes[i].bids);
+        pb_response.set_ask_price(quotes[i].askp);
+        pb_response.set_ask_size(quotes[i].asks);
+        pb_response.SerializeToString(&pb_serialized);
+        zmq::message_t reply(pb_serialized.size());
+        memcpy(reinterpret_cast<void *>(reply.data()), pb_serialized.c_str(),
+            pb_serialized.size());
+        try {
+          socket.send(reply, ZMQ_SNDMORE);
+        } catch(zmq::error_t&) {
+          cout << zmq_strerror(errno) << endl;
+          break;
+        }
+      }
+      // send the final part
+      // mapping nemo
+      bimap<string, int>::right_const_iterator nemo_iterator;
+      nemo_iterator = nemo_map.right.find(quotes[last_quote].nemo);
+      pb_response.set_symbol_nemo(nemo_iterator->second);
+      pb_response.set_timestamp(quotes[last_quote].tstamp);
+      pb_response.set_bid_price(quotes[last_quote].bidp);
+      pb_response.set_bid_size(quotes[last_quote].bids);
+      pb_response.set_ask_price(quotes[last_quote].askp);
+      pb_response.set_ask_size(quotes[last_quote].asks);
+      pb_response.SerializeToString(&pb_serialized);
+      zmq::message_t reply(pb_serialized.size());
+      memcpy(reinterpret_cast<void *>(reply.data()), pb_serialized.c_str(),
+          pb_serialized.size());
+      try {
+        socket.send(reply);
+      } catch(zmq::error_t&) {
+        cout << zmq_strerror(errno) << endl;
+        break;
+      }
     }
 
     // vector resources release
