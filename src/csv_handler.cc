@@ -25,15 +25,13 @@ using std::istringstream;
 using std::stringstream;
 using boost::split;
 using boost::is_any_of;
-using std::transform;
-using std::back_inserter;
 using std::ifstream;
 using std::sort;
 using std::ios;
+using std::ios_base;
 using boost::bimap;
 using boost::tokenizer;
 using boost::regex;
-using boost::escaped_list_separator;
 using boost::char_separator;
 using boost::lexical_cast;
 using namespace boost::posix_time;
@@ -47,14 +45,23 @@ float strtofloat(string const& s) {
   return value;
 }
 
+void CsvHandler::decompress(char *dir){
+  char com[1000];
+  sprintf(com, "gzip -d %s",dir);
+  system(com); 
+  return; 
+}
+
 vector<string> CsvHandler::readdir(string dir) {
   string filename;
   vector<string> arch;
   path p (dir);
   try {
     if (exists(p)) {
-      if (is_regular_file(p))
+      if (is_regular_file(p)){
         cout << p << " size is " << file_size(p) << endl;
+        exit (1);
+      }
       else if (is_directory(p)) {
         typedef vector<path> vec;
         vec v;
@@ -68,11 +75,15 @@ vector<string> CsvHandler::readdir(string dir) {
         }
         return arch; // csv directory ls
       }
-      else
+      else{
         cout << p << " exists, but is neither a regular file nor a directory" << endl;
+        exit (1);
+      }
     }
-    else
+    else{
       cout << p << " does not exist" << endl;
+      exit (1);
+    }
   }
   catch (const filesystem_error& ex) {
     cout << ex.what() << endl;
@@ -81,15 +92,11 @@ vector<string> CsvHandler::readdir(string dir) {
 }
 	
 vector <Quote> CsvHandler:: readcsv(vector<string> files) {
-  int iter=0;
+  // structure vector and structure initialization
   vector <Quote> quotes;
   Quote quote;
-  vector <string> vec;
   vector <string> nemov;
-  vector <string> nemoff;
-  vector < vector<string> > csv;
-  vector <float> vec_float;
-  vector<string>::const_iterator y = files.begin();
+  vector<string>::const_iterator array_files = files.begin();
 
   // map initialization
   bimap<string, int> nemo_map;
@@ -97,22 +104,18 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
   nemo_map.insert(bimap<string, int>::value_type("GBPUSD", 1));
   nemo_map.insert(bimap<string, int>::value_type("USDJPY", 2));
 
-  while(y!=files.end()) {  //files cycle
-    string data(*y);
-    split(nemov,*y,is_any_of("bbo"));
+  //files cycle
+  while(array_files!=files.end()) {  
+    string data(*array_files);
+    split(nemov,*array_files,is_any_of("bbo"));
     split(nemov,nemov.at(0),is_any_of("/")); 
     ifstream in(data.c_str(), ios::ate);
     if (!in.is_open()) cout << "file error" << endl;
     int itertok;
     long sizef;
     char *line;
-    char *tokens;
-    float tmp;
-    string tokenstr;
     string linestr;
-    string dates;
-    string temp;
-    
+    string dates;  
     sizef = in.tellg();
     in.seekg(0, ios::beg);
     line = new char[sizef];
@@ -136,36 +139,36 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
             try{
               quote.bidp = lexical_cast<float>(*tok_iter);
             } catch(std::exception &excep_bidp){
-                cout << "File  corrupted :" << endl;
-                cout << *y << endl;
-                cout << "linea: " << linestr << endl;
+                cout << "Line corrupted on file :" << endl;
+                cout << "   " << *array_files << endl;
+                cout << "    value: " << linestr << endl;
               }
           }
           else if(itertok==3){
 	    try{
               quote.bids = lexical_cast<float>(*tok_iter);
             } catch(std::exception &excep_bids){
-                cout << "File  corrupted :" << endl;
-                cout << *y << endl;
-                cout << "linea: " << linestr << endl;
+                cout << "Line corrupted on file :" << endl;
+                cout << "   " << *array_files << endl;
+                cout << "    value: " << linestr << endl;
               }    
           }
           else if (itertok==4){
             try{
               quote.askp = lexical_cast<float>(*tok_iter);
-            } catch(std::exception excep_askp){
-                cout << "File  corrupted :" << endl;
-                cout << *y << endl;
-                cout << "linea: " << linestr << endl;
+            } catch(std::exception excep_askp){                
+                cout << "Line corrupted on file :" << endl;
+                cout << "   " << *array_files << endl;
+                cout << "    value: " << linestr << endl; 
               }
           }
           else if(itertok==5){
             try{
               quote.asks = lexical_cast<float>(*tok_iter);
             } catch(std::exception excep_asks){
-                cout << "File  corrupted :" << endl;
-                cout << *y << endl;
-                cout << "linea: " << linestr << endl;
+                cout << "Line corrupted on file :" << endl;
+                cout << "   " << *array_files << endl;
+                cout << "    value: " << linestr << endl; 
               }
           }
           itertok++;    
@@ -178,7 +181,7 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
         line = strtok(NULL, "\n");
         }
     }
-    y++;
+    array_files++;
     in.close();
   }
   return quotes;
@@ -200,7 +203,6 @@ string CsvHandler::fixdate(string fdate, string hrs) {
 
 double CsvHandler::totstamp(string fdate, string hrs) {
   int tstamp, dayint;
-  //float splitfloat;
   double timestampfloat, timestamp, splitfloat;
   string tstamps, stringdate;
   vector <string> splitstring;
