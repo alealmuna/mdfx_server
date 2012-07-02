@@ -20,13 +20,13 @@ void PreProcessData(void) {
   vector<string> files;
   vector<Quote> quotes;
 
-  cout << "Looking for files" << endl;
   files = csvhandler.readdir("data");
   quotes = csvhandler.readcsv(files);
   cout << "[Loading Finished] Number of quotes: " << quotes.size() << endl;
   csvhandler.sortvec(quotes);
   cout << "Quotes sorted" << endl;
   writeToH5perDay(quotes);
+  //createIndex(quotes, "data/MDFXIndexes.h5");
 }
 
 void* Worker::listener(void *arg) {

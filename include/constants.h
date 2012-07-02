@@ -24,6 +24,11 @@ typedef struct {
   int *nemo;
 } Fxrequest;
 
+typedef struct {
+  double day;
+  double index;
+} DataIndex;
+
 // List of symbols to pre-process
 #define NEMO_REGEXP "(GBPUSD|USDJPY|EURUSD)"
 
