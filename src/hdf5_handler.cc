@@ -42,8 +42,6 @@ int writeToH5perDay(vector <Quote> &quotes_v){
   int quote_date;
   int status;
   cout << "Write per day" << endl;
-  string wait;
-  std::cin >> wait;
   vector <Quote> dailyq;
   vector <Quote>::iterator begin_it;
   vector <Quote>::iterator end_it;
