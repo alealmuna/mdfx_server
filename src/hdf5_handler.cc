@@ -259,24 +259,28 @@ bool is_candidate(Quote &quote, Fxrequest request,
 
   bool first_doc;
   bool last_doc;
+  bool same_doc;
   bool qu_over;
   bool qu_under;
   bool qu_between;
 
   first_doc = (current == bgn_indx);
-  last_doc = ( current == end_indx);
+  last_doc = (current == end_indx);
+  same_doc = (bgn_indx == end_indx);
   /* request timestamp evaluated in miliseconds */
   qu_over = (quote.tstamp >= request.begin_ts*1000);
   qu_under = (quote.tstamp <= request.end_ts*1000 );
   qu_between = ( current > bgn_indx and current < end_indx );
 
-  cout.precision(20);
-
-  if ((first_doc and qu_over) or
-     (last_doc and qu_under) or
-     (qu_between)){
-    return nemo_in(request.nemo,quote.nemo);
-  };
+  if (same_doc){
+    if (qu_over and qu_under)
+      return nemo_in(request.nemo,quote.nemo);
+  }else{ 
+    if  ((first_doc and qu_over) or
+        (last_doc and qu_under) or
+        (qu_between))
+        return nemo_in(request.nemo,quote.nemo);
+  }
   return false;
 }
   
@@ -329,7 +333,6 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
       Quote *quotes;
       quotes = new Quote[data_size];
       dataset->read( quotes, mtype1 );
-      cout << quotes[0].tstamp << endl;
       for( int j = 0; j < data_size; j++){
         if (is_candidate(quotes[j], request, bgn_indx, end_indx, i) and 
             is_valid_q(quotes[j], request.max_rel_spread)){
