@@ -44,6 +44,7 @@ void ProtoHandler::ProcessRequest(
       nemo_iterator = nemo_map.left.find(pb_request.nemo_list(i));
       fxrequest.nemo[i] = nemo_iterator->second;
     }
+    fxrequest.nemo[pb_request.nemo_list_size()] = -1;  // terminal value
 
     ProcessResponse(fxrequest, quotes);
 }
