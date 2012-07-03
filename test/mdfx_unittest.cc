@@ -44,10 +44,10 @@ TEST_F(FXRequestTest,ReadProtobuf){
 */
 
 TEST_F(CsvHandlerTest, Readdir){
-  string dir = "data";
+  string dir = "test/data";
   vector <string> files;
-  files.push_back("data/raw/EURUSDbbotest.csv");
-  files.push_back("data/raw/USDJPYbbotest.csv");
+  files.push_back("test/data/raw/EURUSDbbotest.csv");
+  files.push_back("test/data/raw/USDJPYbbotest.csv");
   EXPECT_EQ(files.at(0), chandler.readdir(dir).at(0));
   EXPECT_EQ(files.at(1), chandler.readdir(dir).at(1));
 }
@@ -55,8 +55,8 @@ TEST_F(CsvHandlerTest, Readdir){
 TEST_F(CsvHandlerTest,Readcsv){
   vector <string> files;
   vector <Quote> testvec;
-  files.push_back("data/raw/EURUSDbbotest.csv");
-  files.push_back("data/raw/USDJPYbbotest.csv");
+  files.push_back("test/data/raw/EURUSDbbotest.csv");
+  files.push_back("test/data/raw/USDJPYbbotest.csv");
   testvec = chandler.readcsv(files);
   //first file vector
   EXPECT_EQ((long long)1293987739870, (long long)testvec.at(0).tstamp);
