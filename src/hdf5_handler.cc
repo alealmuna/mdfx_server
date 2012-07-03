@@ -217,13 +217,14 @@ string get_filename( vector <Quote> &quotes_v ){
    * provided list.
    */
 
-bool nemo_in(/*vector <int>*/int * nemo_vct, int value){
-  for (int i = 0; i < /*nemo_vct.size()*/ 3 ;i++){
-    if (nemo_vct[i] == value){
+bool nemo_in(int * nemo_vct, int value) {
+  for (int i = 0; i < 3 ;i++) {
+    if (nemo_vct[i] == -1) {
+      return false;
+    } else if (nemo_vct[i] == value) {
       return true;
     }
   }
-  return false;
 }
   /*
    * Generates a file_path based on a double.
