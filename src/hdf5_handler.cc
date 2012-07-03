@@ -154,7 +154,7 @@ int readFromH5(vector <Quote> &result) {
     DataSet* dataset;
     DataSpace* dataspace;
     hsize_t dims_out[1];
-    printf( "Loading query data from files\n" );
+    printf( "[Loading query data from files]\n" );
     dataset = new DataSet(file->openDataSet(DATASET_NAME));
     dataspace = new DataSpace(dataset->getSpace());
 
@@ -164,11 +164,11 @@ int readFromH5(vector <Quote> &result) {
     Quote *quotes;
     quotes = new Quote[data_size];
     dataset->read(quotes, mtype1);
-    printf("Fetching Quotes\n");
+    printf("[Fetching Quotes\n]");
     for (int i = 0; i < data_size; i++) {
        result.push_back(quotes[i]);
     }
-    printf("Cleaning objects\n");
+    printf("[Cleaning objects\n]");
     delete dataset;
     delete file;
   }
@@ -394,7 +394,7 @@ int createIndex(vector <Quote> &quotes_v, string filename) {
         cout.precision(20);
       }
     }
-    cout << "Writing to file: " << filename << endl;
+    cout << "[Writing to file] "  << filename << endl;
     dataset->write(&indexes, mtype1);
     /*
      * Release resources

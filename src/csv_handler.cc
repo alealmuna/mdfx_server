@@ -47,6 +47,7 @@ float strtofloat(string const& s) {
 
 void CsvHandler::decompress(string dir){
   string comm = "cd data/raw && tar xfz ../../" + dir + " --strip=3"; 
+  cout << "[Decompressing file] " << dir << endl;
   system(comm.c_str()); 
   return; 
 }
@@ -59,7 +60,7 @@ vector<string> CsvHandler::readdir(string dir) {
   path p (pathp);
   try {
     if (exists(p)) {
-      if (is_directory(p)) {
+      if (is_directory(p)){ 
         typedef vector<path> gz;
         gz gzpath;
         copy(directory_iterator(p), directory_iterator(), back_inserter(gzpath));
@@ -131,6 +132,7 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
   //files cycle
   while(array_files!=files.end()) {  
     string data(*array_files);
+    cout << "[Loading CSV] " << data<< endl;
     split(nemov,*array_files,is_any_of("bbo"));
     split(nemov,nemov.at(0),is_any_of("/")); 
     ifstream in(data.c_str(), ios::ate);
