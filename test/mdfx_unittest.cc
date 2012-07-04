@@ -46,10 +46,14 @@ TEST_F(FXRequestTest,ReadProtobuf){
 TEST_F(CsvHandlerTest, Readdir){
   string dir = "test/data";
   vector <string> files;
+  vector <string> files_rd;
   files.push_back("test/data/raw/EURUSDbbotest.csv");
   files.push_back("test/data/raw/USDJPYbbotest.csv");
-  EXPECT_EQ(files.at(0), chandler.readdir(dir).at(0));
-  EXPECT_EQ(files.at(1), chandler.readdir(dir).at(1));
+  files_rd = chandler.readdir(dir); 
+  EXPECT_EQ(files.at(0), files_rd.at(0));
+  EXPECT_EQ(files.at(1), files_rd.at(1));
+  files.clear();
+  files_rd.clear();
 }
 
 TEST_F(CsvHandlerTest,Readcsv){
@@ -71,7 +75,9 @@ TEST_F(CsvHandlerTest,Readcsv){
   EXPECT_EQ((float)1.33182, (float)testvec.at(14).bidp);
   EXPECT_EQ(1500000, testvec.at(14).bids);
   EXPECT_EQ((float)12.4, (float)testvec.at(14).askp); 
-  EXPECT_EQ(1, testvec.at(14).asks);  
+  EXPECT_EQ(1, testvec.at(14).asks);
+  files.clear();
+  testvec.clear();  
 }
 
 TEST_F(CsvHandlerTest,Fixdate){
@@ -89,6 +95,11 @@ TEST_F(CsvHandlerTest,Tostamp){
 }
 
 TEST_F(CsvHandlerTest,Sortvec) {
+  //vector <string> files;
+  //vector <Quote> testvec;
+  //files.push_back("test/data/raw/EURUSDbbotest.csv");
+  //files.push_back("test/data/raw/USDJPYbbotest.csv");
+  //testvec = chandler.readcsv(files);
   
 }
 

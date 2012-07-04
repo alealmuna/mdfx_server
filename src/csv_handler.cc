@@ -88,8 +88,10 @@ vector<string> CsvHandler::readdir(string dir) {
                   if(regex_search(filen, exp))
                     archcsv.push_back(filen);
                 }
-                if(archcsv.empty())
+                if(archcsv.empty()){
+                  cout << "empty directory" << endl;
                   exit (1);
+                } 
                 return archcsv;
               }
             }
@@ -140,8 +142,7 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
     int itertok;
     long sizef;
     char *line;
-    string linestr;
-    string dates;  
+    string linestr, dates, hrs;
     sizef = in.tellg();
     in.seekg(0, ios::beg);
     line = new char[sizef];
@@ -158,8 +159,7 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
           if(itertok==0)
             dates = *tok_iter;
           else if(itertok==1){
-            dates = fixdate(dates, *tok_iter);
-            quote.tstamp = totstamp(dates, *tok_iter);
+            hrs = *tok_iter;
           }
           else if(itertok==2){
             try{
@@ -199,17 +199,21 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
           }
           itertok++;    
         }
-	bimap<string, int>::left_const_iterator nemo_iterator;
-      	nemo_iterator = nemo_map.left.find(nemov.back());
-        quote.nemo = nemo_iterator->second;
-        if(quote.bidp>0.0 && quote.bids>0.0 && quote.askp>0.0 && quote.asks>0.0 && quote.askp>=quote.bidp)
+	if(quote.bidp>0.0 && quote.bids>0.0 && quote.askp>0.0 && quote.asks>0.0 && quote.askp>=quote.bidp){
+          bimap<string, int>::left_const_iterator nemo_iterator;
+      	  nemo_iterator = nemo_map.left.find(nemov.back());
+          quote.nemo = nemo_iterator->second;
+          dates = fixdate(dates, hrs);
+          quote.tstamp = totstamp(dates, hrs);
           quotes.push_back(quote);
+        }
         line = strtok(NULL, "\n");
         }
     }
     array_files++;
     in.close();
   }
+  nemov.clear();
   return quotes;
 }
 
@@ -243,6 +247,7 @@ double CsvHandler::totstamp(string fdate, string hrs) {
   long long ms = diff.total_seconds();
   ms *= 1000;
   ms += splitfloat;
+  splitstring.clear();
   return ms;
 }
 
