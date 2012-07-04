@@ -27,6 +27,10 @@ void PreProcessData(void) {
   cout << "Quotes sorted" << endl;
   writeToH5perDay(quotes);
   //createIndex(quotes, "data/MDFXIndexes.h5");
+      
+  // vector resources release
+  if (!quotes.empty())
+    quotes.clear();
 }
 
 void* Worker::listener(void *arg) {
