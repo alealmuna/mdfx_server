@@ -64,13 +64,13 @@ void* Worker::listener(void *arg) {
       break;
     }
 
-    std::cout << "server: Received " << pb_request.begin_timestamp() <<
-      " : " << pb_request.end_timestamp() << std::endl;
-
     // process the request
     phandler.ProcessRequest(request, pb_request, quotes);
     last_quote = quotes.size() - 1;  // we need the index in the vector
-    cout << "Number of quotes to send :" << quotes.size() <<endl;;
+
+    cout << "server: Received " << pb_request.begin_timestamp() <<
+      " : " << pb_request.end_timestamp() << endl;
+    cout << "Number of quotes to send: " << quotes.size() <<endl;;
 
     if (quotes.size() == 0) {
       // if nothing is found, a null message is sent
@@ -129,10 +129,11 @@ void* Worker::listener(void *arg) {
         cout << zmq_strerror(errno) << endl;
         break;
       }
-    }
 
-    // vector resources release
-    quotes.clear();
+      // vector resources release
+      if (!quotes.empty())
+        quotes.clear();
+    }
   }
   return (NULL);
 }
