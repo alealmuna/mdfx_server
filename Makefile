@@ -12,7 +12,7 @@ CLIENT = mdfx_client
 GTEST_HEADERS = lib/include/gtest/*.h \
                 lib/include/gtest/internal/*.h
 
-CPPFLAGS += -I. -Ilib/include -Ilib -ltcmalloc
+CPPFLAGS += -I. -Ilib/include -Ilib 
 BOOST = -lboost_system -lboost_filesystem -lboost_regex -lboost_date_time
 
 server: $(SERVER) 
