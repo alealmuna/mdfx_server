@@ -171,7 +171,7 @@ int readFromH5(vector <Quote> &result) {
     printf("[Cleaning objects\n]");
     delete(dataspace);
     delete(dataset);
-    delete(quotes);
+    delete[] quotes;
     delete(file);
   }
   catch(FileIException error) {
@@ -341,7 +341,7 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
           result.push_back(quotes[j]);
         };
       };
-      delete(quotes);
+      delete[] quotes;
       delete(dataspace);
       delete(dataset);
       delete(file);

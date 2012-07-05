@@ -49,7 +49,7 @@ void ProtoHandler::ProcessRequest(
     ProcessResponse(fxrequest, quotes);
     
     // resources released
-    delete(fxrequest.nemo);
+    delete[] fxrequest.nemo;
 }
 
 bool ProtoHandler::ReadRequestFromFile(
