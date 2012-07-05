@@ -26,8 +26,8 @@ void PreProcessData(void) {
   csvhandler.sortvec(quotes);
   cout << "Quotes sorted" << endl;
   writeToH5perDay(quotes);
-  //createIndex(quotes, "data/MDFXIndexes.h5");
-      
+  // createIndex(quotes, "data/MDFXIndexes.h5");
+
   // vector resources release
   if (!quotes.empty())
     quotes.clear();
@@ -47,12 +47,12 @@ void* Worker::listener(void *arg) {
   nemo_map.insert(bimap<string, int>::value_type("GBPUSD", 1));
   nemo_map.insert(bimap<string, int>::value_type("USDJPY", 2));
 
-  while (1) {
+  while (!s_interrupted) {
     // The response will be saved into a vector
     vector<Quote> quotes;
     float last_quote;
 
-    // Allocation for zmq and protobuff 
+    // Allocation for zmq and protobuff
     zmq::message_t request;
     mdfx_server::FXRequest pb_request;
 
@@ -74,7 +74,7 @@ void* Worker::listener(void *arg) {
 
     cout << "server: Received " << pb_request.begin_timestamp() <<
       " : " << pb_request.end_timestamp() << endl;
-    cout << "Number of quotes to send: " << quotes.size() <<endl;;
+    cout << "Number of quotes to send: " << quotes.size() <<endl;
 
     if (quotes.size() == 0) {
       // if nothing is found, a null message is sent

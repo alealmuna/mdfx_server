@@ -8,4 +8,6 @@ class Worker {
   static void *listener(void *arg);
 };
 
+extern int s_interrupted;
+
 #endif  // INCLUDE_WORKER_H_
