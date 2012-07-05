@@ -61,6 +61,7 @@ TEST_F(CsvHandlerTest,Readcsv){
   vector <Quote> testvec;
   files.push_back("test/data/raw/EURUSDbbotest.csv");
   files.push_back("test/data/raw/USDJPYbbotest.csv");
+  //files.push_back("../staging/storrealba/cart_storrealba_20120615_095234010/EURUSDbbo_201101010000_201102282359.csv");
   testvec = chandler.readcsv(files);
   //first file vector
   EXPECT_EQ((long long)1293987739870, (long long)testvec.at(0).tstamp);

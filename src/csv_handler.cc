@@ -38,18 +38,11 @@ using namespace boost::posix_time;
 using namespace boost::gregorian;
 using namespace boost::filesystem;
 
-float strtofloat(string const& s) {
-  istringstream iss(s);
-  float value;
-  if (!(iss >> value)) throw std::runtime_error("invalid int");
-  return value;
-}
-
 void CsvHandler::decompress(string dir){
   string comm = "cd data/raw && tar xfz ../../" + dir + " --strip=3"; 
   cout << "[Decompressing file] " << dir << endl;
-  system(comm.c_str()); 
-  return; 
+  system(comm.c_str());
+  comm.clear(); 
 }
 
 vector<string> CsvHandler::readdir(string dir) {
@@ -118,11 +111,10 @@ vector<string> CsvHandler::readdir(string dir) {
       }
 }
 	
-vector <Quote> CsvHandler:: readcsv(vector<string> files) {
+vector <Quote> CsvHandler::readcsv(vector<string> files) {
   // structure vector and structure initialization
   vector <Quote> quotes;
   Quote quote;
-  vector <string> nemov;
   vector<string>::const_iterator array_files = files.begin();
 
   // map initialization
@@ -132,88 +124,84 @@ vector <Quote> CsvHandler:: readcsv(vector<string> files) {
   nemo_map.insert(bimap<string, int>::value_type("USDJPY", 2));
 
   //files cycle
-  while(array_files!=files.end()) {  
+  while (array_files != files.end()) {  
     string data(*array_files);
-    cout << "[Loading CSV] " << data<< endl;
-    split(nemov,*array_files,is_any_of("bbo"));
-    split(nemov,nemov.at(0),is_any_of("/")); 
-    ifstream in(data.c_str(), ios::ate);
-    if (!in.is_open()) cout << "file error" << endl;
+    vector <string> nemo;
     int itertok;
-    long sizef;
+    long size_file;
     char *line;
     string linestr, dates, hrs;
-    sizef = in.tellg();
+
+    cout << "[Loading CSV] " << data << endl;
+    /* Get nemo from file name */
+    split(nemo, *array_files,is_any_of("bbo"));
+    split(nemo, nemo.at(0),is_any_of("/"));
+    /* Open csv file */ 
+    ifstream in(data.c_str(), ios::ate);
+    if (!in.is_open()) cout << "file error" << endl;
+    size_file = in.tellg();
     in.seekg(0, ios::beg);
-    line = new char[sizef];
-    while(!in.eof()){
-      in.read(line,sizef+1);
+    line = new char[size_file];
+
+    /* Read csv file */
+    while (!in.eof()) {
+      in.read(line, size_file+1);
       line = strtok(line, "\n");
-      while(line!=NULL){
-        linestr = line;
+
+      /* Split by line */
+      while(line != NULL){
         typedef tokenizer < char_separator <char> > tokenizer;
         char_separator<char> sep(",");
+        linestr = line;
         tokenizer tokens(linestr, sep);
         itertok = 0;
-        for (tokenizer::iterator tok_iter = tokens.begin();tok_iter != tokens.end(); ++tok_iter){
-          if(itertok==0)
-            dates = *tok_iter;
-          else if(itertok==1){
-            hrs = *tok_iter;
-          }
-          else if(itertok==2){
-            try{
+        try {
+          /* Split by element */
+          for (tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter) {
+            if (itertok == 0)
+              dates = *tok_iter;
+            else if (itertok == 1)
+              hrs = *tok_iter;
+            else if (itertok == 2)
               quote.bidp = lexical_cast<float>(*tok_iter);
-            } catch(std::exception &excep_bidp){
-                cout << "Line corrupted on file :" << endl;
-                cout << "   " << *array_files << endl;
-                cout << "    value: " << linestr << endl;
-              }
-          }
-          else if(itertok==3){
-	    try{
+            else if (itertok == 3)
               quote.bids = lexical_cast<float>(*tok_iter);
-            } catch(std::exception &excep_bids){
-                cout << "Line corrupted on file :" << endl;
-                cout << "   " << *array_files << endl;
-                cout << "    value: " << linestr << endl;
-              }    
-          }
-          else if (itertok==4){
-            try{
+            else if (itertok == 4)
               quote.askp = lexical_cast<float>(*tok_iter);
-            } catch(std::exception excep_askp){                
-                cout << "Line corrupted on file :" << endl;
-                cout << "   " << *array_files << endl;
-                cout << "    value: " << linestr << endl; 
-              }
-          }
-          else if(itertok==5){
-            try{
+            else if (itertok == 5)
               quote.asks = lexical_cast<float>(*tok_iter);
-            } catch(std::exception excep_asks){
-                cout << "Line corrupted on file :" << endl;
-                cout << "   " << *array_files << endl;
-                cout << "    value: " << linestr << endl; 
-              }
+            itertok++;    
           }
-          itertok++;    
+        } catch (std::exception exec_cast) {
+          cout << "Line corrupted on file :" << endl;
+          cout << "   " << *array_files << endl;
+          cout << "    value: " << linestr << endl; 
         }
-	if(quote.bidp>0.0 && quote.bids>0.0 && quote.askp>0.0 && quote.asks>0.0 && quote.askp>=quote.bidp){
+        /* Filters */
+	if (quote.bidp > 0.0 && quote.bids > 0.0 && quote.askp > 0.0 && quote.asks > 0.0 && quote.askp >= quote.bidp) {
           bimap<string, int>::left_const_iterator nemo_iterator;
-      	  nemo_iterator = nemo_map.left.find(nemov.back());
+      	  nemo_iterator = nemo_map.left.find(nemo.back());
           quote.nemo = nemo_iterator->second;
+          /* day fix */
           dates = fixdate(dates, hrs);
+          /* date to tstamp */
           quote.tstamp = totstamp(dates, hrs);
+          /* save quote in vector */
           quotes.push_back(quote);
         }
         line = strtok(NULL, "\n");
-        }
+      }
     }
     array_files++;
+
+    delete[] line;
+    data.clear();
+    linestr.clear();
+    dates.clear();
+    hrs.clear();
+    nemo.clear();
     in.close();
   }
-  nemov.clear();
   return quotes;
 }
 
@@ -232,22 +220,25 @@ string CsvHandler::fixdate(string fdate, string hrs) {
 }
 
 double CsvHandler::totstamp(string fdate, string hrs) {
-  int tstamp, dayint;
+  int dayint;
   double timestampfloat, timestamp, splitfloat;
-  string tstamps, stringdate;
+  string tstamp;
   vector <string> splitstring;
 
-  split(splitstring,hrs,is_any_of("."));  
+  split(splitstring, hrs, is_any_of("."));  
   stringstream splits(splitstring.at(1));
   splits >> splitfloat; 
-  tstamps = ""+fdate+" "+hrs+"";
-  ptime tstampd = (time_from_string(tstamps));
+  tstamp = ""+fdate+" "+hrs+"";
+  ptime tstampd = (time_from_string(tstamp));
   ptime timet_start(date(1970,1,1));
   time_duration const diff = tstampd - timet_start;
   long long ms = diff.total_seconds();
   ms *= 1000;
   ms += splitfloat;
+  
   splitstring.clear();
+  tstamp.clear();
+
   return ms;
 }
 
