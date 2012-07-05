@@ -108,8 +108,8 @@ int writeToH5(vector <Quote> &quotes_v, string filename) {
     /*
      * Release resources
      */
-    delete dataset;
-    delete file;
+    delete(dataset);
+    delete(file);
   }  // end of try block
 
   // catch failure caused by the H5File operations
@@ -169,8 +169,10 @@ int readFromH5(vector <Quote> &result) {
        result.push_back(quotes[i]);
     }
     printf("[Cleaning objects\n]");
-    delete dataset;
-    delete file;
+    delete(dataspace);
+    delete(dataset);
+    delete(quotes);
+    delete(file);
   }
   catch(FileIException error) {
     error.printError();
@@ -324,10 +326,10 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
       H5File* file = new H5File(FILE_NAME,
                                 H5F_ACC_RDONLY );
 
-      dataset = new DataSet( file->openDataSet(DATASET_NAME ));
+      dataset = new DataSet(file->openDataSet(DATASET_NAME));
       dataspace = new DataSpace (dataset->getSpace());
 
-      int ndims = dataspace->getSimpleExtentDims( dims_out, NULL);
+      int ndims = dataspace->getSimpleExtentDims(dims_out, NULL);
       int data_size = dims_out[0];
 
       Quote *quotes;
@@ -339,8 +341,10 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
           result.push_back(quotes[j]);
         };
       };
-      delete dataset;
-      delete file;
+      delete(quotes);
+      delete(dataspace);
+      delete(dataset);
+      delete(file);
     }catch( FileIException error ){
     }
   }
@@ -404,8 +408,8 @@ int createIndex(vector <Quote> &quotes_v, string filename) {
      * Release resources
      */
     indexes.clear();
-    delete dataset;
-    delete file;
+    delete(dataset);
+    delete(file);
   }  // end of try block
 
   // catch failure caused by the H5File operations
