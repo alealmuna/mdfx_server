@@ -88,12 +88,12 @@ int writeToH5(vector <Quote> &quotes_v, string filename) {
      * Create the memory datatype.
      */
     CompType mtype1(sizeof(Quote));
-    mtype1.insertMember(TSTAMP, HOFFSET(Quote, tstamp), PredType::NATIVE_FLOAT);
+    mtype1.insertMember(TSTAMP, HOFFSET(Quote, tstamp), PredType::NATIVE_INT);
     mtype1.insertMember(NEMO, HOFFSET(Quote, nemo), PredType::NATIVE_INT);
     mtype1.insertMember(BIDP, HOFFSET(Quote, bidp), PredType::NATIVE_FLOAT);
-    mtype1.insertMember(BIDS, HOFFSET(Quote, bids), PredType::NATIVE_FLOAT);
+    mtype1.insertMember(BIDS, HOFFSET(Quote, bids), PredType::NATIVE_INT);
     mtype1.insertMember(ASKP, HOFFSET(Quote, askp), PredType::NATIVE_FLOAT);
-    mtype1.insertMember(ASKS, HOFFSET(Quote, asks), PredType::NATIVE_FLOAT);
+    mtype1.insertMember(ASKS, HOFFSET(Quote, asks), PredType::NATIVE_INT);
 
     /*
      * Create the dataset.
@@ -144,12 +144,12 @@ int readFromH5(vector <Quote> &result) {
     H5File* file = new H5File(FILE_NAME, H5F_ACC_RDONLY);
 
     CompType mtype1(sizeof(Quote));
-    mtype1.insertMember(TSTAMP, HOFFSET(Quote, tstamp), PredType::NATIVE_FLOAT);
+    mtype1.insertMember(TSTAMP, HOFFSET(Quote, tstamp), PredType::NATIVE_INT);
     mtype1.insertMember(NEMO, HOFFSET(Quote, nemo), PredType::NATIVE_INT);
     mtype1.insertMember(BIDP, HOFFSET(Quote, bidp), PredType::NATIVE_FLOAT);
-    mtype1.insertMember(BIDS, HOFFSET(Quote, bids), PredType::NATIVE_FLOAT);
+    mtype1.insertMember(BIDS, HOFFSET(Quote, bids), PredType::NATIVE_INT);
     mtype1.insertMember(ASKP, HOFFSET(Quote, askp), PredType::NATIVE_FLOAT);
-    mtype1.insertMember(ASKS, HOFFSET(Quote, asks), PredType::NATIVE_FLOAT);
+    mtype1.insertMember(ASKS, HOFFSET(Quote, asks), PredType::NATIVE_INT);
 
     DataSet* dataset;
     DataSpace* dataspace;
@@ -309,12 +309,12 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
   Exception::dontPrint();
 
   CompType mtype1( sizeof(Quote) );
-  mtype1.insertMember( TSTAMP, HOFFSET(Quote, tstamp), PredType::NATIVE_FLOAT);
+  mtype1.insertMember( TSTAMP, HOFFSET(Quote, tstamp), PredType::NATIVE_INT);
   mtype1.insertMember( NEMO, HOFFSET(Quote, nemo), PredType::NATIVE_INT);
   mtype1.insertMember( BIDP, HOFFSET(Quote, bidp), PredType::NATIVE_FLOAT);
-  mtype1.insertMember( BIDS, HOFFSET(Quote, bids), PredType::NATIVE_FLOAT);
+  mtype1.insertMember( BIDS, HOFFSET(Quote, bids), PredType::NATIVE_INT);
   mtype1.insertMember( ASKP, HOFFSET(Quote, askp), PredType::NATIVE_FLOAT);
-  mtype1.insertMember( ASKS, HOFFSET(Quote, asks), PredType::NATIVE_FLOAT);
+  mtype1.insertMember( ASKS, HOFFSET(Quote, asks), PredType::NATIVE_INT);
 
   hsize_t dims_out[1];
 
@@ -339,8 +339,8 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
         if (is_candidate(quotes[j], request, bgn_indx, end_indx, i) and 
             is_valid_q(quotes[j], request.max_rel_spread)){
           result.push_back(quotes[j]);
-        };
-      };
+        }
+      }
       delete[] quotes;
       delete(dataspace);
       delete(dataset);
