@@ -345,9 +345,13 @@ void ProcessResponse( Fxrequest request, vector <Quote> &result){
       delete(dataspace);
       delete(dataset);
       delete(file);
-    }catch( FileIException error ){
+    } catch(FileIException error) {
     }
   }
+
+  // resources released
+  delete[] request.nemo;
+
   printf( "Dispatch!\n\n");
 }
 

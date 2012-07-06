@@ -89,6 +89,7 @@ void* Worker::listener(void *arg) {
         cout << zmq_strerror(errno) << endl;
         break;
       }
+      pb_serialized.clear();
     } else {
       // create the reply as a multipart message, transforming each vector's
       // element into a protobuf object
@@ -112,6 +113,7 @@ void* Worker::listener(void *arg) {
           cout << zmq_strerror(errno) << endl;
           break;
         }
+        pb_serialized.clear();
       }
       // send the final part
       // mapping nemo
@@ -133,10 +135,13 @@ void* Worker::listener(void *arg) {
         cout << zmq_strerror(errno) << endl;
         break;
       }
+      pb_serialized.clear();
 
       // vector resources release
       if (!quotes.empty())
         quotes.clear();
+      // delete all global objects allocated by libprotobuf
+      google::protobuf::ShutdownProtobufLibrary();
     }
   }
   return (NULL);

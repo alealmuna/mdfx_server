@@ -47,9 +47,6 @@ void ProtoHandler::ProcessRequest(
     fxrequest.nemo[pb_request.nemo_list_size()] = -1;  // terminal value
 
     ProcessResponse(fxrequest, quotes);
-    
-    // resources released
-    delete[] fxrequest.nemo;
 }
 
 bool ProtoHandler::ReadRequestFromFile(
