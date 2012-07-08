@@ -38,6 +38,35 @@ using namespace boost::posix_time;
 using namespace boost::gregorian;
 using namespace boost::filesystem;
 
+void CsvHandler::decompress_command(string dir){
+  string path_decom, file_n;
+  
+  path_decom = dir+"/compressed";
+  path decom (path_decom);
+ 
+  /* read tar.gz directory */ 
+  try{
+    if (exists(decom)){
+      if (is_directory(decom)){
+        typedef vector<path> gz;
+        gz gzpath;
+        copy(directory_iterator(decom), directory_iterator(), back_inserter(gzpath));
+        sort(gzpath.begin(), gzpath.end());
+        for (gz::const_iterator it(gzpath.begin()), it_end(gzpath.end()); it != it_end; ++it) {
+          regex data("tar.gz");
+          file_n = (*it).string();
+          if(regex_search(file_n, data))
+            decompress(file_n);                    
+        }
+      } else 
+          cout << decom << " exists, but not a directory" << endl;
+    } else
+        cout << decom << " does not exist" << endl; 
+  } catch (const filesystem_error& ex){
+      cout << ex.what() << endl;
+  }  
+}
+
 void CsvHandler::decompress(string dir){
   string comm = "cd data/raw && tar xfz ../../" + dir + " --strip=3"; 
   cout << "[Decompressing file] " << dir << endl;
@@ -45,71 +74,49 @@ void CsvHandler::decompress(string dir){
   comm.clear(); 
 }
 
+/* Directory reader */
+
 vector<string> CsvHandler::readdir(string dir) {
-  string filen, pathc, pathp;
-  vector<string> archgz;
-  vector<string> archcsv;
-  pathp = dir+"/compressed";
-  path p (pathp);
+  string file_n, path_csv;
+  vector<string> file_csv;
+  
+  /* decompress tar.gz */ 
+  decompress_command(dir);
+
+  /* read csv directory */
+  path_csv = dir+"/raw";;
+  path p_csv (path_csv);
   try {
-    if (exists(p)) {
-      if (is_directory(p)){ 
-        typedef vector<path> gz;
-        gz gzpath;
-        copy(directory_iterator(p), directory_iterator(), back_inserter(gzpath));
-        sort(gzpath.begin(), gzpath.end());
-        for (gz::const_iterator it(gzpath.begin()), it_end(gzpath.end()); it != it_end; ++it) {
-          regex data("tar.gz");
-          filen = (*it).string();
-          if(regex_search(filen, data)){
-              decompress(filen);
-            }          
-          }
-          pathc = dir+"/raw";;
-          path c (pathc);
-          try {
-            if(exists(c)) {
-              if (is_directory(c)){
-                typedef vector<path> csv;
-                csv csvpath;
-                copy(directory_iterator(c), directory_iterator(), back_inserter(csvpath));
-                sort(csvpath.begin(), csvpath.end());
-                vector<path>::iterator itercsv;                 
-                for(itercsv = csvpath.begin(); itercsv < csvpath.end(); itercsv++){
-                  regex exp(NEMO_REGEXP);
-                  filen = (*itercsv).string();
-                  if(regex_search(filen, exp))
-                    archcsv.push_back(filen);
-                }
-                if(archcsv.empty()){
-                  cout << "empty directory" << endl;
-                  exit (1);
-                } 
-                return archcsv;
-              }
-            }
-            else{
-              cout << p << " does not exist" << endl;
-              exit (1);
-            }
-          } 
-          catch (const filesystem_error& ex) {
-            cout << ex.what() << endl;
-          }
-      }else{
-         cout << p << " exists, but is neither a regular file nor a directory" << endl;
-         exit (1);
-       }
-     }
-      else{
-          cout << p << " does not exist" << endl;
-          exit (1);
+    if(exists(p_csv)) {
+      if (is_directory(p_csv)){
+        typedef vector<path> csv;
+        csv csv_path;
+        copy(directory_iterator(p_csv), directory_iterator(), back_inserter(csv_path));
+        sort(csv_path.begin(), csv_path.end());
+        vector<path>::iterator iter_csv;
+                         
+        for(iter_csv = csv_path.begin(); iter_csv < csv_path.end(); iter_csv++){
+          regex exp(NEMO_REGEXP);
+          file_n = (*iter_csv).string();
+          if(regex_search(file_n, exp))
+            file_csv.push_back(file_n);
         }
-      }
-      catch (const filesystem_error& ex) {
-        cout << ex.what() << endl;
-      }
+        
+        if(file_csv.empty())
+          cout << "empty directory" << endl;
+
+        return file_csv;
+
+      } else 
+          cout << p_csv << " exists, but is neither a regular file nor a directory" << endl;
+    } else 
+        cout << p_csv << " does not exist" << endl;
+  } catch (const filesystem_error& ex){
+      cout << ex.what() << endl;      
+  }
 }
+
+/* csv reader */
 	
 vector <Quote> CsvHandler::readcsv(vector<string> files) {
   // structure vector and structure initialization
@@ -241,6 +248,8 @@ double CsvHandler::totstamp(string fdate, string hrs) {
 
   return ms;
 }
+
+/* quotes sort */
 
 bool sortbytstamp( const Quote & lhs, const Quote & rhs )
 {
