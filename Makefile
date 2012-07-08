@@ -88,8 +88,8 @@ mdfx_server: proto_handler.o csv_handler.o hdf5_handler.o worker.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/main.cc $^ -o bin/$@ \
 		-lzmq `pkg-config --cflags --libs protobuf` $(BOOST)
 
-mdfx_client: protoc_interfaces_middleman src/client.cc proto_handler.o hdf5_handler.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/client.cc proto_handler.o hdf5_handler.o -o bin/$@ \
+mdfx_client: protoc_interfaces_middleman src/client.cc 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) src/protobuf/interfaces.pb.cc src/client.cc -o bin/$@ \
 		-lzmq `pkg-config --cflags --libs protobuf`
 
 .PHONY: all test server clean distclean client

@@ -4,17 +4,23 @@
 #include <google/protobuf/stubs/common.h>
 #include <iostream>
 #include <string>
+#include <boost/bimap.hpp>
 
+#include "include/constants.h"
 #include "include/worker.h"
 
 using std::cout;
 using std::endl;
+using std::string;
+using boost::bimap;
 
 int s_interrupted = 0;
 
 static void s_signal_handler(int /*signal_value*/) {
   s_interrupted = 1;
 }
+
+bimap<string, int> nemo_map;
 
 static void s_catch_signals(void) {
   struct sigaction action;
@@ -28,6 +34,11 @@ static void s_catch_signals(void) {
 int main(int argc, char* argv[]) {
   cout << "Amucan Market Data FX" << endl;
   s_catch_signals();
+
+  // map initialization
+  nemo_map.insert(bimap<string, int>::value_type("EURUSD", 0));
+  nemo_map.insert(bimap<string, int>::value_type("GBPUSD", 1));
+  nemo_map.insert(bimap<string, int>::value_type("USDJPY", 2));
 
   // More than 2 arguments
   if (argc > 2) {

@@ -13,7 +13,6 @@ using std::fstream;
 using std::string;
 
 #include "src/protobuf/interfaces.pb.h"
-#include "include/proto_handler.h"
 
 void PromptForRequest(mdfx_server::FXRequest* request) {
   cout << "Enter begin timestamp: ";
@@ -64,7 +63,6 @@ int main(int argc, char* argv[]) {
   zmq::socket_t socket(context, ZMQ_REQ);
 
   mdfx_server::FXRequest pb_request;
-  ProtoHandler phandler;
   // Load request from file 
   if(argc == 3 && !strcmp(argv[1], "--create-request")){
     PromptForRequest(&pb_request);
@@ -93,9 +91,17 @@ int main(int argc, char* argv[]) {
   }
   else if ((argc == 2) && strcmp(argv[1], "--create-request")){
     string filename(argv[1]);
-    if(!phandler.ReadRequestFromFile(filename, pb_request))return 0;
-  } 
-  else  
+    fstream input(filename.c_str(), ios::in | ios::binary);
+
+    if (!input) {
+      cout << filename << ": File not found." << endl;
+      return 0;
+    }
+    if (!pb_request.ParseFromIstream(&input)){
+      cerr << "Failed to parse :" << filename << endl;
+      return 0;
+    }
+  } else  
     PromptForRequest(&pb_request);
   
 

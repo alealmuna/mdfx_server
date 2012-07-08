@@ -1,6 +1,9 @@
 #ifndef INCLUDE_CONSTANTS_H_
 #define INCLUDE_CONSTANTS_H_
 
+#include <string>
+#include <boost/bimap.hpp>
+
 enum ENUM_NEMO {
   EUR_USD,
   GBP_USD,
@@ -28,6 +31,8 @@ typedef struct {
   double day;
   double index;
 } DataIndex;
+
+extern boost::bimap<std::string, int> nemo_map;
 
 // List of symbols to pre-process
 #define NEMO_REGEXP "(GBPUSD|USDJPY|EURUSD)"

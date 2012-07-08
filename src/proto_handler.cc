@@ -4,6 +4,7 @@
 #include <iostream>
 #include <boost/bimap.hpp>
 
+#include "include/constants.h"
 #include "include/proto_handler.h"
 #include "include/hdf5_handler.h"
 
@@ -33,11 +34,6 @@ void ProtoHandler::ProcessRequest(
     int nemo_size = pb_request.nemo_list_size();
     
     fxrequest.nemo = new int[nemo_size];
-
-    bimap<string, int> nemo_map;
-    nemo_map.insert(bimap<string, int>::value_type("EURUSD", 0));
-    nemo_map.insert(bimap<string, int>::value_type("GBPUSD", 1));
-    nemo_map.insert(bimap<string, int>::value_type("USDJPY", 2));
 
     for (int i = 0; i < pb_request.nemo_list_size(); i++) {
       bimap<string, int>::left_const_iterator nemo_iterator;

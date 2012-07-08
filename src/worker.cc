@@ -41,12 +41,6 @@ void* Worker::listener(void *arg) {
 
   ProtoHandler phandler;
 
-  // map initialization
-  bimap<string, int> nemo_map;
-  nemo_map.insert(bimap<string, int>::value_type("EURUSD", 0));
-  nemo_map.insert(bimap<string, int>::value_type("GBPUSD", 1));
-  nemo_map.insert(bimap<string, int>::value_type("USDJPY", 2));
-
   while (!s_interrupted) {
     // The response will be saved into a vector
     vector<Quote> quotes;

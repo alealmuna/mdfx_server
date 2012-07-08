@@ -124,12 +124,6 @@ vector <Quote> CsvHandler::readcsv(vector<string> files) {
   Quote quote;
   vector<string>::const_iterator array_files = files.begin();
 
-  // map initialization
-  bimap<string, int> nemo_map;
-  nemo_map.insert(bimap<string, int>::value_type("EURUSD", 0));
-  nemo_map.insert(bimap<string, int>::value_type("GBPUSD", 1));
-  nemo_map.insert(bimap<string, int>::value_type("USDJPY", 2));
-
   //files cycle
   while (array_files != files.end()) {  
     string data(*array_files);
